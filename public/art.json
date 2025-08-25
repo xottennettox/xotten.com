@@ -1,0 +1,30 @@
+[
+  {
+    "id": "art-001",
+    "title": "Celestial Discovery ",
+    "year": 2024,
+    "media": "Acryl on canvas",
+    "size": "73\u00d753 cm",
+    "price": "\u20ac1,200",
+    "sold": false,
+    "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756156977/Clestial_Discovery_73_x_53_cm_x4og5w.jpg",
+    "tags": [
+      "abstract",
+      "blue"
+    ]
+  },
+  {
+    "id": "art-002",
+    "title": "Quiet Orchard",
+    "year": 2024,
+    "media": "Watercolor",
+    "size": "30\u00d742 cm",
+    "price": "\u20ac350",
+    "sold": true,
+    "image": "/art/sample2.jpg",
+    "tags": [
+      "nature",
+      "green"
+    ]
+  }
+]
