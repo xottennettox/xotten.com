@@ -278,5 +278,36 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243167/Z_Sapphire_Field_73_x_53_cm_srscyn.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-027",
+  "title": "Z Solaria",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "64x55 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243423/Z_Solaria_64_x_55_cm_tfzeva.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-028",
+  "title": "Z Spring Sanctum",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "33x24 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243441/Z_Spring_Sanctum_33_x_24_cm_uxalcc.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-029",
+  "title": "Z Stellar Dance",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243495/Z_Stellar_Dance_60_x_40_cm_f4wsvh.jpg",
+  "tags": ["new"]
+}
 
 ]
