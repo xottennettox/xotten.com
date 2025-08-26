@@ -22,3 +22,14 @@
     "tags": ["nature", "green"]
   }
 ]
+,{
+  "id": "art-003",
+  "title": "Title Here",
+  "year": 2025,
+  "media": "Oil on canvas",
+  "size": "80x60 cm",
+  "price": "EUR 1200",
+  "sold": false,
+  "image": "PASTE_YOUR_HTTPS_CLOUDINARY_URL_HERE",
+  "tags": ["abstract", "blue"]
+}
