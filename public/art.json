@@ -29,7 +29,7 @@
   "media": "Oil on canvas",
   "size": "80x60 cm",
   "price": "EUR 1200",
-  "sold": false,
+  "sold": true,
   "image": "PASTE_YOUR_HTTPS_CLOUDINARY_URL_HERE",
   "tags": ["abstract", "blue"]
 }
