@@ -309,5 +309,26 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243495/Z_Stellar_Dance_60_x_40_cm_f4wsvh.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-030",
+  "title": "Z The Spark",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x20 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243817/Z_The_Spark_61_x_20_cm_m87ynu.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-031",
+  "title": "Z Tranquil Wonder",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243872/Z_Tranquil_Wonder_73_x_53_xm_kh7tbs.jpg",
+  "tags": ["new"]
+}
 
 ]
