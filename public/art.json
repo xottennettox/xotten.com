@@ -123,5 +123,36 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241150/Grace_of_Seraphina_55_x_43_x-cm_d59ypl.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-012",
+  "title": "Interlaced Symphony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241512/Interlaced_Symphony_61_x_61_cm_kglge3.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-013",
+  "title": "Mystic Embrace",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "38x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241544/Mystic_Embrace_38_x_30_cm_wqchyy.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-014",
+  "title": "Starborn",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "46x36 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241634/Starborn_46_x_36_cm_jib6tu.jpg",
+  "tags": ["new"]
+}
 
 ]
