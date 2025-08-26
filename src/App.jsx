@@ -43,7 +43,7 @@ export default function App() {
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("all");
   const [owner, setOwner] = useState(false);
-  const [active, setActive] = useState(null); // ← for the lightbox
+  const [activeIndex, setActiveIndex] = useState(null); // ← for the lightbox
 
   // Owner mode via URL param (?owner=code) or stored flag
   useEffect(() => {
@@ -89,14 +89,22 @@ export default function App() {
     });
   }, [items, q, tag]);
 
-  // Close lightbox on ESC
-  useEffect(() => {
-    function onKey(e) {
-      if (e.key === "Escape") setActive(null);
+// Keyboard: Esc closes; ← / → navigate when lightbox is open
+useEffect(() => {
+  function onKey(e) {
+    if (e.key === "Escape") setActiveIndex(null);
+    if (activeIndex !== null) {
+      if (e.key === "ArrowLeft") {
+        setActiveIndex(i => (i > 0 ? i - 1 : filtered.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveIndex(i => (i < filtered.length - 1 ? i + 1 : 0));
+      }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }
+  window.addEventListener("keydown", onKey);
+  return () => window.removeEventListener("keydown", onKey);
+}, [activeIndex, filtered.length]);
+
 
   function enterOwnerCode() {
     const code = window.prompt("Enter owner code:");
@@ -146,8 +154,8 @@ export default function App() {
       {/* Gallery */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filtered.map((it) => (
-            <Card key={it.id} item={it} owner={owner} onOpen={() => setActive(it)} />
+          {filtered.map((it, idx) => (
+            <Card key={it.id} item={it} owner={owner} onOpen={() => setActiveIndex(idx)} />
           ))}
         </div>
       </main>
@@ -157,10 +165,17 @@ export default function App() {
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
-      {/* Lightbox modal */}
-      {active && (
-        <Lightbox item={active} onClose={() => setActive(null)} />)
-      }
+{/* Lightbox modal */}
+{activeIndex !== null && (
+  <Lightbox
+    item={filtered[activeIndex]}
+    onClose={() => setActiveIndex(null)}
+    onPrev={() => setActiveIndex(i => (i > 0 ? i - 1 : filtered.length - 1))}
+    onNext={() => setActiveIndex(i => (i < filtered.length - 1 ? i + 1 : 0))}
+  />
+)}
+
+      
     </div>
   );
 }
@@ -205,8 +220,7 @@ function Card({ item, owner, onOpen }) {
   );
 }
 
-function Lightbox({ item, onClose }) {
-  // Use a larger transform for the viewer
+function Lightbox({ item, onClose, onPrev, onNext }) {
   const src = cldThumb(item.image, 2400);
   return (
     <div
@@ -215,6 +229,15 @@ function Lightbox({ item, onClose }) {
       role="dialog"
       aria-modal="true"
     >
+      {/* Prev button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onPrev(); }}
+        aria-label="Previous"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 text-xl shadow flex items-center justify-center select-none"
+      >
+        ‹
+      </button>
+
       <div
         className="relative max-w-6xl w-full max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -224,6 +247,8 @@ function Lightbox({ item, onClose }) {
           alt={item.title}
           className="w-full h-auto max-h-[90vh] object-contain rounded-xl shadow-2xl"
         />
+
+        {/* Close */}
         <button
           onClick={onClose}
           aria-label="Close"
@@ -232,10 +257,22 @@ function Lightbox({ item, onClose }) {
         >
           ✕
         </button>
+
+        {/* Caption */}
         <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-sm px-3 py-1 rounded-t-lg shadow">
           {item.title} {item.year ? `· ${item.year}` : ""} {item.size ? `· ${item.size}` : ""}
         </div>
       </div>
+
+      {/* Next button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onNext(); }}
+        aria-label="Next"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 text-xl shadow flex items-center justify-center select-none"
+      >
+        ›
+      </button>
     </div>
   );
 }
+
