@@ -3,11 +3,11 @@
     "id": "art-001",
     "title": "Celestial Discovery",
     "year": 2024,
-    "media": "Acryl on canvas",
+    "media": "Acrylic on canvas",
     "size": "73x53 cm",
-    "price": "€1,200",
+    "price": "EUR 1200",
     "sold": false,
-    "image": "/art/celestial.jpg",
+    "image": "CLD_URL_1",
     "tags": ["abstract", "blue"]
   },
   {
@@ -16,9 +16,9 @@
     "year": 2024,
     "media": "Watercolor",
     "size": "30x42 cm",
-    "price": "€350",
-    "sold": true,
-    "image": "/art/orchard.jpg",
+    "price": "EUR 350",
+    "sold": false,
+    "image": "CLD_URL_2",
     "tags": ["nature", "green"]
   }
 ]
