@@ -20,7 +20,8 @@
     "sold": false,
     "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210004/Starshine_60_x_40_cm_kelto4.jpg",
     "tags": ["nature", "green"]
-  },
+  }
+
 ,{
   "id": "art-003",
   "title": "Title Here",
