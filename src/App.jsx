@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-const OWNER_CODE = "universe and me are all aligned";
+// ─────────────────────────────────────────────────────────────
+//  Config
+// ─────────────────────────────────────────────────────────────
+const OWNER_CODE = "universe and me are all aligned"; // change whenever you like
 
+// Data fallback so local preview works even before art.json exists
 const FALLBACK_DATA = [
   {
     id: "art-001",
-    title: "Azure Horizon",
+    title: "The Celestial Discovery",
     year: 2025,
     media: "Oil on canvas",
     size: "80×60 cm",
@@ -27,9 +31,10 @@ const FALLBACK_DATA = [
   },
 ];
 
+// Add sensible Cloudinary transforms when the URL is a Cloudinary one
 function cldThumb(url, width = 1600) {
   if (!url || typeof url !== "string") return url;
-  if (!url.includes("/upload/")) return url; // not a Cloudinary URL
+  if (!url.includes("/upload/")) return url; // not Cloudinary
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
@@ -38,7 +43,9 @@ export default function App() {
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("all");
   const [owner, setOwner] = useState(false);
+  const [active, setActive] = useState(null); // ← for the lightbox
 
+  // Owner mode via URL param (?owner=code) or stored flag
   useEffect(() => {
     const saved = localStorage.getItem("ownerMode") === "1";
     const params = new URLSearchParams(window.location.search);
@@ -51,6 +58,7 @@ export default function App() {
     }
   }, []);
 
+  // Load art.json when available
   useEffect(() => {
     fetch("/art.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : FALLBACK_DATA))
@@ -58,12 +66,14 @@ export default function App() {
       .catch(() => setItems(FALLBACK_DATA));
   }, []);
 
+  // Build tag list for filter
   const allTags = useMemo(() => {
     const set = new Set();
     items.forEach((it) => it.tags?.forEach((t) => set.add(t)));
     return ["all", ...Array.from(set).sort()];
   }, [items]);
 
+  // Apply search + tag filters
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
     return items.filter((it) => {
@@ -79,6 +89,15 @@ export default function App() {
     });
   }, [items, q, tag]);
 
+  // Close lightbox on ESC
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") setActive(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   function enterOwnerCode() {
     const code = window.prompt("Enter owner code:");
     if (!code) return;
@@ -93,9 +112,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
+      {/* Header */}
       <header className="sticky top-0 z-20 backdrop-blur bg-white/70 border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="text-2xl font-bold tracking-tight">My Art Portfolio</div>
+          <div className="text-2xl font-bold tracking-tight">Xotten Art</div>
           <div className="ml-auto flex items-center gap-2">
             <input
               className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-neutral-200"
@@ -123,28 +143,37 @@ export default function App() {
         </div>
       </header>
 
+      {/* Gallery */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {filtered.map((it) => (
-            <Card key={it.id} item={it} owner={owner} />
+            <Card key={it.id} item={it} owner={owner} onOpen={() => setActive(it)} />
           ))}
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="py-10 text-center text-sm text-neutral-500">
         © {new Date().getFullYear()} · All works © You.
       </footer>
+
+      {/* Lightbox modal */}
+      {active && (
+        <Lightbox item={active} onClose={() => setActive(null)} />)
+      }
     </div>
   );
 }
 
-function Card({ item, owner }) {
-  const imgSrc = cldThumb(item.image, 1600);
+function Card({ item, owner, onOpen }) {
   return (
-    <div className="group relative bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition">
+    <button
+      onClick={onOpen}
+      className="group relative text-left bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition cursor-zoom-in"
+    >
       <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
         <img
-          src={imgSrc}
+          src={cldThumb(item.image, 1200)}
           alt={item.title}
           className="w-full h-full object-cover group-hover:scale-[1.02] transition"
           loading="lazy"
@@ -163,6 +192,7 @@ function Card({ item, owner }) {
         )}
       </div>
 
+      {/* Owner-only SOLD overlay */}
       {owner && item.sold && (
         <>
           <div className="absolute inset-0 bg-neutral-700/35 backdrop-blur-[1px]" />
@@ -171,6 +201,41 @@ function Card({ item, owner }) {
           </div>
         </>
       )}
+    </button>
+  );
+}
+
+function Lightbox({ item, onClose }) {
+  // Use a larger transform for the viewer
+  const src = cldThumb(item.image, 2400);
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="relative max-w-6xl w-full max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={item.title}
+          className="w-full h-auto max-h-[90vh] object-contain rounded-xl shadow-2xl"
+        />
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute -top-3 -right-3 bg-white text-neutral-800 rounded-full shadow p-2 hover:scale-105 transition"
+          title="Close (Esc)"
+        >
+          ✕
+        </button>
+        <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-sm px-3 py-1 rounded-t-lg shadow">
+          {item.title} {item.year ? `· ${item.year}` : ""} {item.size ? `· ${item.size}` : ""}
+        </div>
+      </div>
     </div>
   );
 }
