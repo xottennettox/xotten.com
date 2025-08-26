@@ -5,7 +5,6 @@
     "year": 2024,
     "media": "Acrylic on canvas",
     "size": "73x53 cm",
-    "price": "EUR 1200",
     "sold": false,
     "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210029/Ethereal_Resonance_73_x_53_cm_eu3ad5.jpg",
     "tags": ["abstract", "blue"]
@@ -16,7 +15,6 @@
     "year": 2024,
     "media": "Watercolor",
     "size": "30x42 cm",
-    "price": "EUR 350",
     "sold": false,
     "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210004/Starshine_60_x_40_cm_kelto4.jpg",
     "tags": ["nature", "green"]
@@ -28,7 +26,6 @@
   "year": 2025,
   "media": "Oil on canvas",
   "size": "80x60 cm",
-  "price": "EUR 1200",
   "sold": true,
   "image": "PASTE_YOUR_HTTPS_CLOUDINARY_URL_HERE",
   "tags": ["abstract", "blue"]
@@ -40,7 +37,6 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "73x53 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239830/Clestial_Discovery_73_x_53_cm_vtzwmv.jpg",
   "tags": ["new"]
@@ -51,7 +47,6 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "33x24 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239897/Copper_Lotus_Reverie_33_x_24_cm_v8rj8h.jpg",
   "tags": ["new"]
@@ -62,9 +57,39 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "62x54 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239950/Night_Devine_62_x_54_cm_er0x2q.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-006",
+  "title": "Red Flame Frequency",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "40x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240261/Red_Flame_Frequency_40_x_30_cm_bnfj17.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-007",
+  "title": "Unifying Tapestry",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "90x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240329/Unifying_Tapestry_90_x_30_cm_juojme.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-008",
+  "title": "Z Elements of Life",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "20x20 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240368/Z_Elements_of_Life_20_x_20_cm_zn0v8s.jpg",
   "tags": ["new"]
 }
 
