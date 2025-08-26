@@ -216,5 +216,36 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242517/Z_Ether_Plume_43_x_55_cm_mte43q.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-021",
+  "title": "Z Flourish in Vale",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242811/Z_Flourish_in_Vale_60_x_40_cm_annbt4.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-022",
+  "title": "Z KaleidoSoul",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "42x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242830/Z_KaleidoSoul_42_x_30_cm_j2zmjc.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-023",
+  "title": "Z Lady in Blue",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242889/Z_Lady_in_Blue_60_x_40_cm_you6ax.jpg",
+  "tags": ["new"]
+}
 
 ]
