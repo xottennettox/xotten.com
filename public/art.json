@@ -154,5 +154,39 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241634/Starborn_46_x_36_cm_jib6tu.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-015",
+  "title": "Triangularity",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241995/Triangularity_60_x_40_cm_zmo0rb.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-016",
+  "title": "Trio Sphere",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242064/Trio_Sphere_61_x_61_cm_tcoghn.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-017",
+  "title": "Triskelion",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242145/Triskelion_60_x_40_cm_n7fmix.jpg",
+  "tags": ["new"]
+}
 
 ]
