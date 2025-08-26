@@ -33,4 +33,39 @@
   "image": "PASTE_YOUR_HTTPS_CLOUDINARY_URL_HERE",
   "tags": ["abstract", "blue"]
 }
+,
+{
+  "id": "art-003",
+  "title": "Celestial Discovery",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239830/Clestial_Discovery_73_x_53_cm_vtzwmv.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-004",
+  "title": "Copper Lotus Reverie",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "33x24 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239897/Copper_Lotus_Reverie_33_x_24_cm_v8rj8h.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-005",
+  "title": "Night Devine",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "62x54 cm",
+  "price": "EUR TBD",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239950/Night_Devine_62_x_54_cm_er0x2q.jpg",
+  "tags": ["new"]
+}
+
 ]
