@@ -161,7 +161,6 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "60x40 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241995/Triangularity_60_x_40_cm_zmo0rb.jpg",
   "tags": ["new"]
@@ -172,7 +171,6 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "61x61 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242064/Trio_Sphere_61_x_61_cm_tcoghn.jpg",
   "tags": ["new"]
@@ -183,9 +181,39 @@
   "year": 2025,
   "media": "Mixed media",
   "size": "60x40 cm",
-  "price": "EUR TBD",
   "sold": false,
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242145/Triskelion_60_x_40_cm_n7fmix.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-018",
+  "title": "Whispers of Infinite Bloom",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242348/Whispers_of_Infinite_Bloom_73_x_53_cm_iy4oj1.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-019",
+  "title": "Z Cosmic Symphony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "122x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242481/Z_Cosmic_Symphony_122_x_61_cm_ar2opb.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-020",
+  "title": "Z Ether Plume",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "43x55 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242517/Z_Ether_Plume_43_x_55_cm_mte43q.jpg",
   "tags": ["new"]
 }
 
