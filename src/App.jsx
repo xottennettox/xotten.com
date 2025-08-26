@@ -209,13 +209,11 @@ function Card({ item, owner, onOpen }) {
 
       {/* Owner-only SOLD overlay */}
       {owner && item.sold && (
-        <>
-          <div className="absolute inset-0 bg-neutral-700/35 backdrop-blur-[1px]" />
-          <div className="absolute left-0 top-4 -rotate-6 bg-neutral-800 text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
-            Sold
-          </div>
-        </>
-      )}
+  <div className="absolute left-0 top-4 -rotate-6 bg-neutral-800 text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
+    Sold
+  </div>
+)}
+
     </button>
   );
 }
