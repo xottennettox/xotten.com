@@ -7,7 +7,7 @@
     "size": "73x53 cm",
     "price": "EUR 1200",
     "sold": false,
-    "image": "CLD_URL_1",
+    "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210029/Ethereal_Resonance_73_x_53_cm_eu3ad5.jpg",
     "tags": ["abstract", "blue"]
   },
   {
@@ -18,7 +18,7 @@
     "size": "30x42 cm",
     "price": "EUR 350",
     "sold": false,
-    "image": "CLD_URL_2",
+    "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210004/Starshine_60_x_40_cm_kelto4.jpg",
     "tags": ["nature", "green"]
   }
 ]
