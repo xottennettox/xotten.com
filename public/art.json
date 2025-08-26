@@ -92,5 +92,36 @@
   "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240368/Z_Elements_of_Life_20_x_20_cm_zn0v8s.jpg",
   "tags": ["new"]
 }
+,
+{
+  "id": "art-009",
+  "title": "Comic Bloom",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240928/Comic_Bloom_61_x_61_cm_he2hdr.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-010",
+  "title": "Emerald Harmony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "38x38 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241024/Emerald_Harmony_38_x_38_cm_dpswzg.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-011",
+  "title": "Grace of Seraphina",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "55x43 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241150/Grace_of_Seraphina_55_x_43_x-cm_d59ypl.jpg",
+  "tags": ["new"]
+}
 
 ]
