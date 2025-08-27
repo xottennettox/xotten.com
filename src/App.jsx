@@ -4,9 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 //  Config
 // ─────────────────────────────────────────────────────────────
 const OWNER_CODE = "universe and me are all aligned"; // change whenever you like
-
-// reset key so everyone defaults to Compact again
-const DENSITY_KEY = "density_v2";
+const DENSITY_KEY = "density_v3"; // bump to reset everyone to Compact
 
 // Data fallback so local preview works even before art.json exists
 const FALLBACK_DATA = [
@@ -126,12 +124,12 @@ export default function App() {
     }
   }
 
-  // Grid layout based on density
+  // Grid layout based on density (denser + tighter gaps)
   const gridClasses =
     density === "compact"
-      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4"
+      ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
       : density === "cozy"
-      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"; // comfortable
 
   return (
@@ -142,13 +140,13 @@ export default function App() {
           <div className="text-2xl font-bold tracking-tight">Xotten Art</div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <input
-              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-neutral-200"
+              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
               placeholder="Search title, year, media, tag…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             <select
-              className="px-3 py-2 rounded-xl border border-neutral-300"
+              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
               title="Filter by tag"
@@ -160,7 +158,7 @@ export default function App() {
               ))}
             </select>
             <select
-              className="px-3 py-2 rounded-xl border border-neutral-300"
+              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
               value={density}
               onChange={(e) => setDensity(e.target.value)}
               title="Thumbnail size"
@@ -170,7 +168,7 @@ export default function App() {
               <option value="comfortable">View: Comfortable</option>
             </select>
             <button
-              className="px-3 py-2 rounded-xl border border-neutral-300"
+              className="px-3 py-2 rounded-xl border border-transparent bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition"
               onClick={enterOwnerCode}
               title="Owner login"
             >
@@ -232,7 +230,7 @@ function Card({ item, owner, density, onOpen }) {
   const pad =
     density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
   const titleSize =
-    density === "compact" ? "text-base" : density === "cozy" ? "text-[1.05rem]" : "text-lg";
+    density === "compact" ? "text-[0.95rem]" : density === "cozy" ? "text-[1.05rem]" : "text-lg";
   const infoSize = density === "compact" ? "text-xs" : "text-sm";
 
   return (
@@ -240,7 +238,7 @@ function Card({ item, owner, density, onOpen }) {
       onClick={onOpen}
       className="group relative text-left bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition cursor-zoom-in"
     >
-      <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
+      <div className="aspect-square bg-neutral-100 overflow-hidden">
         <img
           src={cldThumb(item.image, 1200)}
           alt={item.title}
@@ -260,14 +258,15 @@ function Card({ item, owner, density, onOpen }) {
         <div className={`mt-1 text-neutral-600 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
-        {item.price && (
+        {/* Price: show only to Owner */}
+        {owner && item.price && (
           <div className="mt-2 text-sm font-medium">{item.price}</div>
         )}
       </div>
 
-      {/* Owner-only SOLD ribbon (no grey overlay) */}
+      {/* Owner-only SOLD ribbon (terracotta) */}
       {owner && item.sold && (
-        <div className="absolute left-0 top-4 -rotate-6 bg-neutral-800 text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
+        <div className="absolute left-0 top-4 -rotate-6 bg-[#CC5C3F] text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
           Sold
         </div>
       )}
