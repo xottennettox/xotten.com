@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 // ─────────────────────────────────────────────────────────────
 //  Config
 // ─────────────────────────────────────────────────────────────
-const OWNER_CODE = "universe and me are all aligned"; // change whenever you like
+const OWNER_CODE = "universe and me are all aligned";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb";
 const DENSITY_KEY = "density_v3"; // compact default
 
 // Data fallback so local preview works even before art.json exists
@@ -37,13 +38,6 @@ function cldThumb(url, width = 1600) {
   if (!url || typeof url !== "string") return url;
   if (!url.includes("/upload/")) return url; // not Cloudinary
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
-}
-
-// Encode helper for Netlify form POST
-function encode(data) {
-  return Object.keys(data)
-    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-    .join("&");
 }
 
 export default function App() {
@@ -131,51 +125,13 @@ export default function App() {
     }
   }
 
-  // Grid layout based on density (denser + tighter gaps)
+  // Grid layout based on density
   const gridClasses =
     density === "compact"
       ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
       : density === "cozy"
       ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"; // comfortable
-
-  // ─────────────────────────────────────────────────────────────
-  // Contact form state & submit (Netlify Forms)
-  // ─────────────────────────────────────────────────────────────
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    piece: "",
-    message: "",
-    "bot-field": "", // honeypot
-  });
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    if (form["bot-field"]) return; // ignore bots
-    try {
-      await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({
-          "form-name": "contact",
-          ...form,
-        }),
-      });
-      setSent(true);
-      setForm({ name: "", email: "", piece: "", message: "", "bot-field": "" });
-    } catch (err) {
-      setError("Oops, something went wrong. Please try again in a moment.");
-    }
-  }
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -242,108 +198,15 @@ export default function App() {
       <section id="about" className="max-w-4xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-semibold mb-3">About</h2>
         <p className="text-neutral-700 leading-relaxed">
-          I’m Xotten — painter and explorer of color, geometry, and rhythm.
-          My work blends intuitive gestures with structured forms to create
-          calm, luminous spaces. Every piece is an invitation to pause, breathe,
-          and feel.
+          I’m Xotten — painter and explorer of color, geometry, and rhythm. My
+          work blends intuitive gestures with structured forms to create calm,
+          luminous spaces. Every piece is an invitation to pause, breathe, and
+          feel.
         </p>
       </section>
 
-      {/* Contact */}
-      <section id="contact" className="max-w-3xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-4">Contact</h2>
-
-        {sent ? (
-          <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
-            Thank you — I’ll get back to you soon.
-          </div>
-        ) : (
-          <form
-            name="contact"
-            method="POST"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
-            onSubmit={handleSubmit}
-            className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4"
-          >
-            {/* Netlify needs these */}
-            <input type="hidden" name="form-name" value="contact" />
-            <input
-              type="text"
-              name="bot-field"
-              value={form["bot-field"]}
-              onChange={handleChange}
-              className="hidden"
-              tabIndex={-1}
-              autoComplete="off"
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm mb-1">Name</label>
-                <input
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Email</label>
-                <input
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Artwork (optional)</label>
-              <select
-                className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-                name="piece"
-                value={form.piece}
-                onChange={handleChange}
-              >
-                <option value="">General enquiry</option>
-                {items.map((it) => (
-                  <option key={it.id} value={it.title}>
-                    {it.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Message</label>
-              <textarea
-                className="w-full min-h-[140px] px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition"
-            >
-              Send
-            </button>
-
-            {error && (
-              <div className="text-sm text-red-600 mt-2">{error}</div>
-            )}
-          </form>
-        )}
-      </section>
+      {/* Contact (Formspree) */}
+      <ContactForm items={items} />
 
       {/* Footer */}
       <footer className="py-10 text-center text-sm text-neutral-500">
@@ -371,7 +234,11 @@ function Card({ item, owner, density, onOpen }) {
   const pad =
     density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
   const titleSize =
-    density === "compact" ? "text-[0.95rem]" : density === "cozy" ? "text-[1.05rem]" : "text-lg";
+    density === "compact"
+      ? "text-[0.95rem]"
+      : density === "cozy"
+      ? "text-[1.05rem]"
+      : "text-lg";
   const infoSize = density === "compact" ? "text-xs" : "text-sm";
 
   return (
@@ -475,5 +342,116 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
         ›
       </button>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contact form (Formspree)
+// ─────────────────────────────────────────────────────────────
+function ContactForm({ items }) {
+  const [state, setState] = useState({
+    name: "",
+    email: "",
+    piece: "",
+    message: "",
+  });
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    setStatus("sending");
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new FormData(e.currentTarget),
+      });
+      if (res.ok) {
+        setStatus("sent");
+        setState({ name: "", email: "", piece: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <section id="contact" className="max-w-3xl mx-auto px-4 py-12">
+      <h2 className="text-2xl font-semibold mb-4">Contact</h2>
+      <p className="text-neutral-700 mb-6">
+        Interested in a piece or have a question? Send me a message below.
+      </p>
+
+      {status === "sent" ? (
+        <div className="rounded-xl bg-green-50 text-green-800 border border-green-200 p-4">
+          Thank you! Your message was sent. I’ll get back to you soon.
+        </div>
+      ) : (
+        <form onSubmit={onSubmit} className="grid gap-4">
+          <input type="hidden" name="_subject" value="New inquiry from xotten.com" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <input
+              name="name"
+              required
+              placeholder="Your name"
+              className="px-3 py-2 rounded-xl border border-neutral-300"
+              value={state.name}
+              onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
+            />
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Your email"
+              className="px-3 py-2 rounded-xl border border-neutral-300"
+              value={state.email}
+              onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
+            />
+          </div>
+          <select
+            name="piece"
+            className="px-3 py-2 rounded-xl border border-neutral-300"
+            value={state.piece}
+            onChange={(e) => setState((s) => ({ ...s, piece: e.target.value }))}
+          >
+            <option value="">General enquiry</option>
+            {items.map((it) => (
+              <option key={it.id} value={it.title}>
+                {it.title}
+              </option>
+            ))}
+          </select>
+          <textarea
+            name="message"
+            required
+            placeholder="Your message"
+            className="px-3 py-2 rounded-xl border border-neutral-300 min-h-[120px]"
+            value={state.message}
+            onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
+          />
+          <button
+            type="submit"
+            disabled={status === "sending"}
+            className="px-4 py-2 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-60"
+          >
+            {status === "sending" ? "Sending…" : "Send message"}
+          </button>
+          <p className="text-sm text-neutral-500">
+            Prefer email?{" "}
+            <a className="underline" href="mailto:xottenhobby@gmail.com">
+              xottenhobby@gmail.com
+            </a>
+          </p>
+        </form>
+      )}
+
+      {status === "error" && (
+        <div className="mt-4 rounded-xl bg-red-50 text-red-800 border border-red-200 p-3">
+          Oops—something went wrong. Please try again or email me directly.
+        </div>
+      )}
+    </section>
   );
 }
