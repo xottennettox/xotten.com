@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 /* ─────────────────────────────────────────────────────────────
    Config
    ───────────────────────────────────────────────────────────── */
-const OWNER_CODE = "universe and me are all aligned"; // owner mode unlock code
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb"; // your Formspree id
+const OWNER_CODE = "universe and me are all aligned";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb"; // your Formspree endpoint
 const DENSITY_KEY = "density_v3";
 
 /* Fallback data so local preview works even if art.json isn’t there yet */
@@ -40,8 +40,8 @@ function cldThumb(url, width = 1600) {
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
-/* Small helper for hash-based routing (no extra packages needed) */
-function useHashRoute(defaultRoute = "gallery") {
+/* Tiny hash router (no package) */
+function useHashRoute(defaultRoute = "homepage") {
   const [route, setRoute] = useState(
     window.location.hash.replace(/^#/, "") || defaultRoute
   );
@@ -71,8 +71,8 @@ export default function App() {
   /* lightbox index */
   const [activeIndex, setActiveIndex] = useState(null);
 
-  /* simple routes: gallery (available), portfolio (sold), detail, bio, guestbook, blog, contact */
-  const [route, go] = useHashRoute("gallery");
+  /* simple routes */
+  const [route] = useHashRoute("homepage");
 
   /* owner mode via ?owner=… or saved flag */
   useEffect(() => {
@@ -92,14 +92,14 @@ export default function App() {
       .catch(() => setItems(FALLBACK_DATA));
   }, []);
 
-  /* tags for filter */
+  /* tags */
   const allTags = useMemo(() => {
     const set = new Set();
     items.forEach((it) => it.tags?.forEach((t) => set.add(t)));
     return ["all", ...Array.from(set).sort()];
   }, [items]);
 
-  /* text search + tag filter (applied in each page) */
+  /* filtering */
   const filterList = (list) => {
     const ql = q.trim().toLowerCase();
     return list.filter((it) => {
@@ -115,6 +115,15 @@ export default function App() {
     });
   };
 
+  const available = filterList(items.filter((it) => !it.sold));
+  const sold = filterList(items.filter((it) => it.sold));
+  const currentList =
+    route === "portfolio"
+      ? sold
+      : route === "detail"
+      ? available.concat(sold)
+      : available; // homepage
+
   /* keyboard for lightbox */
   useEffect(() => {
     function onKey(e) {
@@ -129,14 +138,9 @@ export default function App() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex]);
+  }, [activeIndex, currentList]);
 
-  /* page lists */
-  const available = filterList(items.filter((it) => !it.sold));
-  const sold = filterList(items.filter((it) => it.sold));
-  const currentList = route === "portfolio" ? sold : available;
-
-  /* grid classes (denser + smaller text) */
+  /* grid classes */
   const gridClasses =
     density === "compact"
       ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
@@ -158,10 +162,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      {/* HEADER */}
       <Header
         route={route}
-        go={go}
         q={q}
         setQ={setQ}
         tag={tag}
@@ -172,30 +174,48 @@ export default function App() {
         onOwner={enterOwnerCode}
       />
 
-      {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {route === "gallery" && (
+        {route === "homepage" && (
           <>
-            <SectionTitle title="Available works" />
-            <Gallery
-              list={available}
-              owner={owner}
-              density={density}
-              onOpen={setActiveIndex}
-            />
+            <SectionTitle title="Homepage" />
+            <div className={gridClasses}>
+              {available.map((it, idx) => (
+                <Card
+                  key={it.id}
+                  item={it}
+                  owner={owner}
+                  density={density}
+                  onOpen={() => setActiveIndex(idx)}
+                />
+              ))}
+            </div>
+            {available.length === 0 && (
+              <div className="text-sm text-neutral-500 mt-4">
+                Nothing to show.
+              </div>
+            )}
           </>
         )}
 
         {route === "portfolio" && (
           <>
-            <SectionTitle title="Portfolio (sold works)" />
-            <Gallery
-              list={sold}
-              owner={owner}
-              density={density}
-              onOpen={setActiveIndex}
-              showSoldRibbon={false} // page already indicates sold
-            />
+            <SectionTitle title="Portfolio" />
+            <div className={gridClasses}>
+              {sold.map((it, idx) => (
+                <Card
+                  key={it.id}
+                  item={it}
+                  owner={owner}
+                  density={density}
+                  onOpen={() => setActiveIndex(idx)}
+                />
+              ))}
+            </div>
+            {sold.length === 0 && (
+              <div className="text-sm text-neutral-500 mt-4">
+                No portfolio items yet.
+              </div>
+            )}
           </>
         )}
 
@@ -206,12 +226,17 @@ export default function App() {
               Click any artwork to open a large, high-quality view. Use your
               keyboard arrows to navigate; press Esc to close.
             </p>
-            <Gallery
-              list={available.concat(sold)}
-              owner={owner}
-              density={density}
-              onOpen={setActiveIndex}
-            />
+            <div className={gridClasses}>
+              {currentList.map((it, idx) => (
+                <Card
+                  key={it.id}
+                  item={it}
+                  owner={owner}
+                  density={density}
+                  onOpen={() => setActiveIndex(idx)}
+                />
+              ))}
+            </div>
           </>
         )}
 
@@ -275,12 +300,10 @@ export default function App() {
         )}
       </main>
 
-      {/* FOOTER */}
       <footer className="py-8 text-center text-xs text-neutral-500">
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
-      {/* LIGHTBOX */}
       {activeIndex !== null && (
         <Lightbox
           list={currentList}
@@ -304,7 +327,6 @@ export default function App() {
 
 function Header({
   route,
-  go,
   q,
   setQ,
   tag,
@@ -319,7 +341,7 @@ function Header({
   const linkClass = "block px-4 py-2 rounded hover:bg-neutral-100";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         {/* Hamburger */}
         <button
@@ -373,18 +395,22 @@ function Header({
         </div>
       </div>
 
-      {/* Slide-out drawer */}
+      {/* Dark overlay (behind the drawer) */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${
+        className={`fixed inset-0 z-[60] bg-black/70 transition-opacity ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setOpen(false)}
+        aria-hidden={!open}
       />
+
+      {/* SOLID drawer */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-lg border-r border-neutral-200 transform transition-transform ${
+        className={`fixed top-0 left-0 h-full w-72 z-[80] bg-white text-neutral-900 shadow-2xl border-r border-neutral-200 transform transition-transform ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
-        aria-hidden={!open}
+        role="dialog"
+        aria-modal="true"
       >
         <div className="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
           <div className="font-semibold">Menu</div>
@@ -398,18 +424,18 @@ function Header({
         </div>
         <nav className="p-3 text-sm">
           <a
-            href="#gallery"
+            href="#homepage"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "gallery" ? activeClass : ""}`}
+            className={`${linkClass} ${route === "homepage" ? activeClass : ""}`}
           >
-            Home (Available)
+            Homepage
           </a>
           <a
             href="#portfolio"
             onClick={() => setOpen(false)}
             className={`${linkClass} ${route === "portfolio" ? activeClass : ""}`}
           >
-            Portfolio (Sold)
+            Portfolio
           </a>
           <a
             href="#detail"
@@ -446,18 +472,6 @@ function Header({
           >
             Contact
           </a>
-
-          <div className="mt-4 border-t pt-3 text-neutral-500">
-            <div className="text-xs mb-2">Social (coming later)</div>
-            <div className="flex gap-2 text-xs">
-              <span className="inline-block px-2 py-1 rounded bg-neutral-100">
-                Instagram
-              </span>
-              <span className="inline-block px-2 py-1 rounded bg-neutral-100">
-                Facebook
-              </span>
-            </div>
-          </div>
         </nav>
       </aside>
     </header>
@@ -468,38 +482,8 @@ function SectionTitle({ title }) {
   return <h2 className="text-base font-semibold mb-3">{title}</h2>;
 }
 
-function Gallery({ list, owner, density, onOpen, showSoldRibbon = true }) {
-  return (
-    <div className={density === "comfortable" ? "space-y-4" : ""}>
-      <div
-        className={
-          density === "comfortable"
-            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
-            : density === "cozy"
-            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-            : "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
-        }
-      >
-        {list.map((it, idx) => (
-          <Card
-            key={it.id}
-            item={it}
-            owner={owner}
-            density={density}
-            onOpen={() => onOpen(idx)}
-            showSoldRibbon={showSoldRibbon}
-          />
-        ))}
-      </div>
-      {list.length === 0 && (
-        <div className="text-sm text-neutral-500">Nothing to show.</div>
-      )}
-    </div>
-  );
-}
-
-/* Smaller text + consistent rounded thumbnails */
-function Card({ item, owner, density, onOpen, showSoldRibbon }) {
+/* Consistent rounded thumbnails + smaller text, owner-only price */
+function Card({ item, owner, density, onOpen }) {
   const pad = density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
   const titleSize =
     density === "compact" ? "text-[0.95rem]" : density === "cozy" ? "text-[1.02rem]" : "text-base";
@@ -530,19 +514,11 @@ function Card({ item, owner, density, onOpen, showSoldRibbon }) {
         <div className={`mt-1 text-neutral-600 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
-
         {/* Price: only owner sees it */}
         {owner && item.price && (
           <div className="mt-2 text-xs font-medium">{item.price}</div>
         )}
       </div>
-
-      {/* Optional SOLD ribbon (suppressed on the portfolio page since everything is sold) */}
-      {showSoldRibbon && item.sold && (
-        <div className="absolute left-0 top-4 -rotate-6 bg-[#CC5C3F] text-white px-3 py-1 text-[10px] uppercase tracking-wider rounded-r-xl shadow">
-          Sold
-        </div>
-      )}
     </button>
   );
 }
@@ -638,7 +614,10 @@ function SimpleForm({ endpoint, subject, children }) {
           Thank you! Your message was sent.
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4">
+        <form
+          onSubmit={onSubmit}
+          className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4"
+        >
           <input type="hidden" name="_subject" value={subject} />
           {children}
           <button
