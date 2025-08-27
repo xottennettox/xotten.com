@@ -5,6 +5,9 @@ import React, { useEffect, useMemo, useState } from "react";
 // ─────────────────────────────────────────────────────────────
 const OWNER_CODE = "universe and me are all aligned"; // change whenever you like
 
+// reset key so everyone defaults to Compact again
+const DENSITY_KEY = "density_v2";
+
 // Data fallback so local preview works even before art.json exists
 const FALLBACK_DATA = [
   {
@@ -43,7 +46,13 @@ export default function App() {
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("all");
   const [owner, setOwner] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null); // ← for the lightbox
+  const [activeIndex, setActiveIndex] = useState(null); // lightbox
+
+  // Thumbnail density (default to 'compact'; stored per browser)
+  const [density, setDensity] = useState(
+    localStorage.getItem(DENSITY_KEY) || "compact"
+  );
+  useEffect(() => localStorage.setItem(DENSITY_KEY, density), [density]);
 
   // Owner mode via URL param (?owner=code) or stored flag
   useEffect(() => {
@@ -89,22 +98,21 @@ export default function App() {
     });
   }, [items, q, tag]);
 
-// Keyboard: Esc closes; ← / → navigate when lightbox is open
-useEffect(() => {
-  function onKey(e) {
-    if (e.key === "Escape") setActiveIndex(null);
-    if (activeIndex !== null) {
-      if (e.key === "ArrowLeft") {
-        setActiveIndex(i => (i > 0 ? i - 1 : filtered.length - 1));
-      } else if (e.key === "ArrowRight") {
-        setActiveIndex(i => (i < filtered.length - 1 ? i + 1 : 0));
+  // Keyboard: Esc closes; ← / → navigate when lightbox is open
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") setActiveIndex(null);
+      if (activeIndex !== null) {
+        if (e.key === "ArrowLeft") {
+          setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1));
+        } else if (e.key === "ArrowRight") {
+          setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0));
+        }
       }
     }
-  }
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, [activeIndex, filtered.length]);
-
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeIndex, filtered.length]);
 
   function enterOwnerCode() {
     const code = window.prompt("Enter owner code:");
@@ -118,13 +126,21 @@ useEffect(() => {
     }
   }
 
+  // Grid layout based on density
+  const gridClasses =
+    density === "compact"
+      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4"
+      : density === "cozy"
+      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"; // comfortable
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
       {/* Header */}
       <header className="sticky top-0 z-20 backdrop-blur bg-white/70 border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="text-2xl font-bold tracking-tight">Xotten Art</div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center gap-2">
             <input
               className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-neutral-200"
               placeholder="Search title, year, media, tag…"
@@ -135,10 +151,23 @@ useEffect(() => {
               className="px-3 py-2 rounded-xl border border-neutral-300"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
+              title="Filter by tag"
             >
               {allTags.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
+            </select>
+            <select
+              className="px-3 py-2 rounded-xl border border-neutral-300"
+              value={density}
+              onChange={(e) => setDensity(e.target.value)}
+              title="Thumbnail size"
+            >
+              <option value="compact">View: Compact</option>
+              <option value="cozy">View: Cozy</option>
+              <option value="comfortable">View: Comfortable</option>
             </select>
             <button
               className="px-3 py-2 rounded-xl border border-neutral-300"
@@ -152,46 +181,60 @@ useEffect(() => {
       </header>
 
       {/* Gallery */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className={gridClasses}>
           {filtered.map((it, idx) => (
-            <Card key={it.id} item={it} owner={owner} onOpen={() => setActiveIndex(idx)} />
+            <Card
+              key={it.id}
+              item={it}
+              owner={owner}
+              density={density}
+              onOpen={() => setActiveIndex(idx)}
+            />
           ))}
         </div>
       </main>
-	  {/* About */}
-<section id="about" className="max-w-4xl mx-auto px-4 py-12">
-  <h2 className="text-2xl font-semibold mb-3">About</h2>
-  <p className="text-neutral-700 leading-relaxed">
-    I’m Xotten — painter and explorer of color, geometry, and rhythm.
-    My work blends intuitive gestures with structured forms to create
-    calm, luminous spaces. Every piece is an invitation to pause, breathe,
-    and feel.
-  </p>
-</section>
 
+      {/* About */}
+      <section id="about" className="max-w-4xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-semibold mb-3">About</h2>
+        <p className="text-neutral-700 leading-relaxed">
+          I’m Xotten — painter and explorer of color, geometry, and rhythm.
+          My work blends intuitive gestures with structured forms to create
+          calm, luminous spaces. Every piece is an invitation to pause, breathe,
+          and feel.
+        </p>
+      </section>
 
       {/* Footer */}
       <footer className="py-10 text-center text-sm text-neutral-500">
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
-{/* Lightbox modal */}
-{activeIndex !== null && (
-  <Lightbox
-    item={filtered[activeIndex]}
-    onClose={() => setActiveIndex(null)}
-    onPrev={() => setActiveIndex(i => (i > 0 ? i - 1 : filtered.length - 1))}
-    onNext={() => setActiveIndex(i => (i < filtered.length - 1 ? i + 1 : 0))}
-  />
-)}
-
-      
+      {/* Lightbox modal */}
+      {activeIndex !== null && (
+        <Lightbox
+          item={filtered[activeIndex]}
+          onClose={() => setActiveIndex(null)}
+          onPrev={() =>
+            setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1))
+          }
+          onNext={() =>
+            setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0))
+          }
+        />
+      )}
     </div>
   );
 }
 
-function Card({ item, owner, onOpen }) {
+function Card({ item, owner, density, onOpen }) {
+  const pad =
+    density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
+  const titleSize =
+    density === "compact" ? "text-base" : density === "cozy" ? "text-[1.05rem]" : "text-lg";
+  const infoSize = density === "compact" ? "text-xs" : "text-sm";
+
   return (
     <button
       onClick={onOpen}
@@ -205,12 +248,16 @@ function Card({ item, owner, onOpen }) {
           loading="lazy"
         />
       </div>
-      <div className="p-4">
+      <div className={pad}>
         <div className="flex items-baseline gap-2">
-          <h3 className="font-semibold text-lg leading-tight flex-1">{item.title}</h3>
-          {item.year && <span className="text-sm text-neutral-500">{item.year}</span>}
+          <h3 className={`font-semibold leading-tight flex-1 ${titleSize}`}>
+            {item.title}
+          </h3>
+          {item.year && (
+            <span className="text-sm text-neutral-500">{item.year}</span>
+          )}
         </div>
-        <div className="mt-1 text-sm text-neutral-600">
+        <div className={`mt-1 text-neutral-600 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
         {item.price && (
@@ -218,13 +265,12 @@ function Card({ item, owner, onOpen }) {
         )}
       </div>
 
-      {/* Owner-only SOLD overlay */}
+      {/* Owner-only SOLD ribbon (no grey overlay) */}
       {owner && item.sold && (
-  <div className="absolute left-0 top-4 -rotate-6 bg-neutral-800 text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
-    Sold
-  </div>
-)}
-
+        <div className="absolute left-0 top-4 -rotate-6 bg-neutral-800 text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
+          Sold
+        </div>
+      )}
     </button>
   );
 }
@@ -240,7 +286,10 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
     >
       {/* Prev button */}
       <button
-        onClick={(e) => { e.stopPropagation(); onPrev(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPrev();
+        }}
         aria-label="Previous"
         className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 text-xl shadow flex items-center justify-center select-none"
       >
@@ -269,13 +318,17 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
 
         {/* Caption */}
         <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-sm px-3 py-1 rounded-t-lg shadow">
-          {item.title} {item.year ? `· ${item.year}` : ""} {item.size ? `· ${item.size}` : ""}
+          {item.title} {item.year ? `· ${item.year}` : ""}{" "}
+          {item.size ? `· ${item.size}` : ""}
         </div>
       </div>
 
       {/* Next button */}
       <button
-        onClick={(e) => { e.stopPropagation(); onNext(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onNext();
+        }}
         aria-label="Next"
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 text-xl shadow flex items-center justify-center select-none"
       >
@@ -284,4 +337,3 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
     </div>
   );
 }
-
