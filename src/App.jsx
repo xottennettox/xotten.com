@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-// ─────────────────────────────────────────────────────────────
-//  Config
-// ─────────────────────────────────────────────────────────────
-const OWNER_CODE = "universe and me are all aligned";
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb";
-const DENSITY_KEY = "density_v3"; // compact default
+/* ─────────────────────────────────────────────────────────────
+   Config
+   ───────────────────────────────────────────────────────────── */
+const OWNER_CODE = "universe and me are all aligned"; // owner mode unlock code
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb"; // your Formspree id
+const DENSITY_KEY = "density_v3";
 
-// Data fallback so local preview works even before art.json exists
+/* Fallback data so local preview works even if art.json isn’t there yet */
 const FALLBACK_DATA = [
   {
     id: "art-001",
@@ -33,40 +33,58 @@ const FALLBACK_DATA = [
   },
 ];
 
-// Add sensible Cloudinary transforms when the URL is a Cloudinary one
+/* Cloudinary: add smart transforms if URL is Cloudinary */
 function cldThumb(url, width = 1600) {
   if (!url || typeof url !== "string") return url;
-  if (!url.includes("/upload/")) return url; // not Cloudinary
+  if (!url.includes("/upload/")) return url;
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
+/* Small helper for hash-based routing (no extra packages needed) */
+function useHashRoute(defaultRoute = "gallery") {
+  const [route, setRoute] = useState(
+    window.location.hash.replace(/^#/, "") || defaultRoute
+  );
+  useEffect(() => {
+    const onHash = () => setRoute(window.location.hash.replace(/^#/, "") || defaultRoute);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [defaultRoute]);
+  return [route, (r) => (window.location.hash = r)];
+}
+
 export default function App() {
+  /* data + filters */
   const [items, setItems] = useState(FALLBACK_DATA);
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("all");
-  const [owner, setOwner] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null); // lightbox
 
-  // Thumbnail density (default: 'compact')
+  /* owner mode + prices visibility */
+  const [owner, setOwner] = useState(false);
+
+  /* density (thumbnail size) */
   const [density, setDensity] = useState(
     localStorage.getItem(DENSITY_KEY) || "compact"
   );
   useEffect(() => localStorage.setItem(DENSITY_KEY, density), [density]);
 
-  // Owner mode via URL param (?owner=code) or stored flag
+  /* lightbox index */
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  /* simple routes: gallery (available), portfolio (sold), detail, bio, guestbook, blog, contact */
+  const [route, go] = useHashRoute("gallery");
+
+  /* owner mode via ?owner=… or saved flag */
   useEffect(() => {
     const saved = localStorage.getItem("ownerMode") === "1";
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("owner");
+    const code = new URLSearchParams(window.location.search).get("owner");
     if (code && code.toLowerCase().trim() === OWNER_CODE.toLowerCase().trim()) {
       localStorage.setItem("ownerMode", "1");
       setOwner(true);
-    } else if (saved) {
-      setOwner(true);
-    }
+    } else if (saved) setOwner(true);
   }, []);
 
-  // Load art.json when available
+  /* load art.json */
   useEffect(() => {
     fetch("/art.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : FALLBACK_DATA))
@@ -74,17 +92,17 @@ export default function App() {
       .catch(() => setItems(FALLBACK_DATA));
   }, []);
 
-  // Build tag list for filter
+  /* tags for filter */
   const allTags = useMemo(() => {
     const set = new Set();
     items.forEach((it) => it.tags?.forEach((t) => set.add(t)));
     return ["all", ...Array.from(set).sort()];
   }, [items]);
 
-  // Apply search + tag filters
-  const filtered = useMemo(() => {
+  /* text search + tag filter (applied in each page) */
+  const filterList = (list) => {
     const ql = q.trim().toLowerCase();
-    return items.filter((it) => {
+    return list.filter((it) => {
       const passQ =
         !ql ||
         it.title?.toLowerCase().includes(ql) ||
@@ -95,23 +113,36 @@ export default function App() {
       const passTag = tag === "all" || it.tags?.includes(tag);
       return passQ && passTag;
     });
-  }, [items, q, tag]);
+  };
 
-  // Keyboard: Esc closes; ← / → navigate when lightbox is open
+  /* keyboard for lightbox */
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") setActiveIndex(null);
       if (activeIndex !== null) {
         if (e.key === "ArrowLeft") {
-          setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1));
+          setActiveIndex((i) => (i > 0 ? i - 1 : currentList.length - 1));
         } else if (e.key === "ArrowRight") {
-          setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0));
+          setActiveIndex((i) => (i < currentList.length - 1 ? i + 1 : 0));
         }
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, filtered.length]);
+  }, [activeIndex]);
+
+  /* page lists */
+  const available = filterList(items.filter((it) => !it.sold));
+  const sold = filterList(items.filter((it) => it.sold));
+  const currentList = route === "portfolio" ? sold : available;
+
+  /* grid classes (denser + smaller text) */
+  const gridClasses =
+    density === "compact"
+      ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
+      : density === "cozy"
+      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
 
   function enterOwnerCode() {
     const code = window.prompt("Enter owner code:");
@@ -125,104 +156,141 @@ export default function App() {
     }
   }
 
-  // Grid layout based on density
-  const gridClasses =
-    density === "compact"
-      ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
-      : density === "cozy"
-      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"; // comfortable
-
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      {/* Header */}
-      <header className="sticky top-0 z-20 backdrop-blur bg-white/70 border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="text-2xl font-bold tracking-tight">Xotten Art</div>
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            <input
-              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-              placeholder="Search title, year, media, tag…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-            <select
-              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              title="Filter by tag"
-            >
-              {allTags.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              className="px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
-              value={density}
-              onChange={(e) => setDensity(e.target.value)}
-              title="Thumbnail size"
-            >
-              <option value="compact">View: Compact</option>
-              <option value="cozy">View: Cozy</option>
-              <option value="comfortable">View: Comfortable</option>
-            </select>
-            <button
-              className="px-3 py-2 rounded-xl border border-transparent bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition"
-              onClick={enterOwnerCode}
-              title="Owner login"
-            >
-              Owner
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* HEADER */}
+      <Header
+        route={route}
+        go={go}
+        q={q}
+        setQ={setQ}
+        tag={tag}
+        setTag={setTag}
+        allTags={allTags}
+        density={density}
+        setDensity={setDensity}
+        onOwner={enterOwnerCode}
+      />
 
-      {/* Gallery */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className={gridClasses}>
-          {filtered.map((it, idx) => (
-            <Card
-              key={it.id}
-              item={it}
+      {/* MAIN CONTENT */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {route === "gallery" && (
+          <>
+            <SectionTitle title="Available works" />
+            <Gallery
+              list={available}
               owner={owner}
               density={density}
-              onOpen={() => setActiveIndex(idx)}
+              onOpen={setActiveIndex}
             />
-          ))}
-        </div>
+          </>
+        )}
+
+        {route === "portfolio" && (
+          <>
+            <SectionTitle title="Portfolio (sold works)" />
+            <Gallery
+              list={sold}
+              owner={owner}
+              density={density}
+              onOpen={setActiveIndex}
+              showSoldRibbon={false} // page already indicates sold
+            />
+          </>
+        )}
+
+        {route === "detail" && (
+          <>
+            <SectionTitle title="Detail photos" />
+            <p className="text-sm text-neutral-600 mb-4">
+              Click any artwork to open a large, high-quality view. Use your
+              keyboard arrows to navigate; press Esc to close.
+            </p>
+            <Gallery
+              list={available.concat(sold)}
+              owner={owner}
+              density={density}
+              onOpen={setActiveIndex}
+            />
+          </>
+        )}
+
+        {route === "bio" && (
+          <section className="max-w-4xl mx-auto py-6">
+            <SectionTitle title="Bio" />
+            <p className="text-sm leading-relaxed text-neutral-700">
+              I’m Xotten — painter and explorer of color, geometry, and rhythm.
+              My work blends intuitive gestures with structured forms to create
+              calm, luminous spaces. Every piece is an invitation to pause,
+              breathe, and feel.
+            </p>
+          </section>
+        )}
+
+        {route === "guestbook" && (
+          <section className="max-w-3xl mx-auto py-6">
+            <SectionTitle title="Guestbook" />
+            <p className="text-sm text-neutral-600 mb-4">
+              Leave a note — I love reading your impressions.
+            </p>
+            <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New guestbook entry">
+              <TextInput name="name" label="Name" required />
+              <TextInput name="email" type="email" label="Email" required />
+              <TextArea name="message" label="Message" required />
+            </SimpleForm>
+          </section>
+        )}
+
+        {route === "blog" && (
+          <section className="max-w-4xl mx-auto py-6">
+            <SectionTitle title="Blog" />
+            <p className="text-sm text-neutral-600">
+              Blog coming soon. I’ll share works-in-progress, thoughts and
+              events here.
+            </p>
+          </section>
+        )}
+
+        {route === "contact" && (
+          <section className="max-w-3xl mx-auto py-6">
+            <SectionTitle title="Contact" />
+            <p className="text-sm text-neutral-600 mb-4">
+              Interested in a piece or have a question? Send me a message.
+            </p>
+            <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New inquiry from xotten.com">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <TextInput name="name" label="Name" required />
+                <TextInput name="email" type="email" label="Email" required />
+              </div>
+              <TextInput name="piece" label="Artwork (optional)" />
+              <TextArea name="message" label="Message" required />
+            </SimpleForm>
+            <p className="text-xs text-neutral-500 mt-3">
+              Prefer email?{" "}
+              <a className="underline" href="mailto:xottenhobby@gmail.com">
+                xottenhobby@gmail.com
+              </a>
+            </p>
+          </section>
+        )}
       </main>
 
-      {/* About */}
-      <section id="about" className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-3">About</h2>
-        <p className="text-neutral-700 leading-relaxed">
-          I’m Xotten — painter and explorer of color, geometry, and rhythm. My
-          work blends intuitive gestures with structured forms to create calm,
-          luminous spaces. Every piece is an invitation to pause, breathe, and
-          feel.
-        </p>
-      </section>
-
-      {/* Contact (Formspree) */}
-      <ContactForm items={items} />
-
-      {/* Footer */}
-      <footer className="py-10 text-center text-sm text-neutral-500">
+      {/* FOOTER */}
+      <footer className="py-8 text-center text-xs text-neutral-500">
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
-      {/* Lightbox modal */}
+      {/* LIGHTBOX */}
       {activeIndex !== null && (
         <Lightbox
-          item={filtered[activeIndex]}
+          list={currentList}
+          index={activeIndex}
           onClose={() => setActiveIndex(null)}
           onPrev={() =>
-            setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1))
+            setActiveIndex((i) => (i > 0 ? i - 1 : currentList.length - 1))
           }
           onNext={() =>
-            setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0))
+            setActiveIndex((i) => (i < currentList.length - 1 ? i + 1 : 0))
           }
         />
       )}
@@ -230,15 +298,211 @@ export default function App() {
   );
 }
 
-function Card({ item, owner, density, onOpen }) {
-  const pad =
-    density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
+/* ─────────────────────────────────────────────────────────────
+   Pieces
+   ───────────────────────────────────────────────────────────── */
+
+function Header({
+  route,
+  go,
+  q,
+  setQ,
+  tag,
+  setTag,
+  allTags,
+  density,
+  setDensity,
+  onOwner,
+}) {
+  const [open, setOpen] = useState(false);
+  const activeClass = "text-neutral-900 font-medium";
+  const linkClass = "block px-4 py-2 rounded hover:bg-neutral-100";
+
+  return (
+    <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/80 backdrop-blur">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        {/* Hamburger */}
+        <button
+          aria-label="Menu"
+          onClick={() => setOpen(true)}
+          className="w-9 h-9 rounded-lg border border-neutral-300 flex items-center justify-center hover:bg-neutral-100"
+        >
+          ☰
+        </button>
+
+        {/* Logo */}
+        <div className="text-xl font-bold tracking-tight">Xotten Art</div>
+
+        {/* Right controls */}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <input
+            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            placeholder="Search…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <select
+            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            value={tag}
+            onChange={(e) => setTag(e.target.value)}
+            title="Tag filter"
+          >
+            {allTags.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <select
+            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            value={density}
+            onChange={(e) => setDensity(e.target.value)}
+            title="Thumbnail size"
+          >
+            <option value="compact">Compact</option>
+            <option value="cozy">Cozy</option>
+            <option value="comfortable">Comfortable</option>
+          </select>
+          <button
+            className="px-3 py-2 rounded-xl border border-transparent bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition text-sm"
+            onClick={onOwner}
+            title="Owner login"
+          >
+            Owner
+          </button>
+        </div>
+      </div>
+
+      {/* Slide-out drawer */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpen(false)}
+      />
+      <aside
+        className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-lg border-r border-neutral-200 transform transition-transform ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        aria-hidden={!open}
+      >
+        <div className="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
+          <div className="font-semibold">Menu</div>
+          <button
+            aria-label="Close menu"
+            className="w-8 h-8 rounded-md border border-neutral-300 hover:bg-neutral-100"
+            onClick={() => setOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+        <nav className="p-3 text-sm">
+          <a
+            href="#gallery"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "gallery" ? activeClass : ""}`}
+          >
+            Home (Available)
+          </a>
+          <a
+            href="#portfolio"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "portfolio" ? activeClass : ""}`}
+          >
+            Portfolio (Sold)
+          </a>
+          <a
+            href="#detail"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "detail" ? activeClass : ""}`}
+          >
+            Detail photos
+          </a>
+          <a
+            href="#bio"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "bio" ? activeClass : ""}`}
+          >
+            Bio
+          </a>
+          <a
+            href="#guestbook"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "guestbook" ? activeClass : ""}`}
+          >
+            Guestbook
+          </a>
+          <a
+            href="#blog"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "blog" ? activeClass : ""}`}
+          >
+            Blog
+          </a>
+          <a
+            href="#contact"
+            onClick={() => setOpen(false)}
+            className={`${linkClass} ${route === "contact" ? activeClass : ""}`}
+          >
+            Contact
+          </a>
+
+          <div className="mt-4 border-t pt-3 text-neutral-500">
+            <div className="text-xs mb-2">Social (coming later)</div>
+            <div className="flex gap-2 text-xs">
+              <span className="inline-block px-2 py-1 rounded bg-neutral-100">
+                Instagram
+              </span>
+              <span className="inline-block px-2 py-1 rounded bg-neutral-100">
+                Facebook
+              </span>
+            </div>
+          </div>
+        </nav>
+      </aside>
+    </header>
+  );
+}
+
+function SectionTitle({ title }) {
+  return <h2 className="text-base font-semibold mb-3">{title}</h2>;
+}
+
+function Gallery({ list, owner, density, onOpen, showSoldRibbon = true }) {
+  return (
+    <div className={density === "comfortable" ? "space-y-4" : ""}>
+      <div
+        className={
+          density === "comfortable"
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+            : density === "cozy"
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            : "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
+        }
+      >
+        {list.map((it, idx) => (
+          <Card
+            key={it.id}
+            item={it}
+            owner={owner}
+            density={density}
+            onOpen={() => onOpen(idx)}
+            showSoldRibbon={showSoldRibbon}
+          />
+        ))}
+      </div>
+      {list.length === 0 && (
+        <div className="text-sm text-neutral-500">Nothing to show.</div>
+      )}
+    </div>
+  );
+}
+
+/* Smaller text + consistent rounded thumbnails */
+function Card({ item, owner, density, onOpen, showSoldRibbon }) {
+  const pad = density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
   const titleSize =
-    density === "compact"
-      ? "text-[0.95rem]"
-      : density === "cozy"
-      ? "text-[1.05rem]"
-      : "text-lg";
+    density === "compact" ? "text-[0.95rem]" : density === "cozy" ? "text-[1.02rem]" : "text-base";
   const infoSize = density === "compact" ? "text-xs" : "text-sm";
 
   return (
@@ -246,7 +510,7 @@ function Card({ item, owner, density, onOpen }) {
       onClick={onOpen}
       className="group relative text-left bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition cursor-zoom-in"
     >
-      <div className="aspect-square bg-neutral-100 overflow-hidden">
+      <div className="aspect-square bg-neutral-100 overflow-hidden rounded-xl">
         <img
           src={cldThumb(item.image, 1200)}
           alt={item.title}
@@ -260,21 +524,22 @@ function Card({ item, owner, density, onOpen }) {
             {item.title}
           </h3>
           {item.year && (
-            <span className="text-sm text-neutral-500">{item.year}</span>
+            <span className="text-[0.8rem] text-neutral-500">{item.year}</span>
           )}
         </div>
         <div className={`mt-1 text-neutral-600 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
-        {/* Price: show only to Owner */}
+
+        {/* Price: only owner sees it */}
         {owner && item.price && (
-          <div className="mt-2 text-sm font-medium">{item.price}</div>
+          <div className="mt-2 text-xs font-medium">{item.price}</div>
         )}
       </div>
 
-      {/* Owner-only SOLD ribbon (terracotta) */}
-      {owner && item.sold && (
-        <div className="absolute left-0 top-4 -rotate-6 bg-[#CC5C3F] text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
+      {/* Optional SOLD ribbon (suppressed on the portfolio page since everything is sold) */}
+      {showSoldRibbon && item.sold && (
+        <div className="absolute left-0 top-4 -rotate-6 bg-[#CC5C3F] text-white px-3 py-1 text-[10px] uppercase tracking-wider rounded-r-xl shadow">
           Sold
         </div>
       )}
@@ -282,7 +547,8 @@ function Card({ item, owner, density, onOpen }) {
   );
 }
 
-function Lightbox({ item, onClose, onPrev, onNext }) {
+function Lightbox({ list, index, onClose, onPrev, onNext }) {
+  const item = list[index];
   const src = cldThumb(item.image, 2400);
   return (
     <div
@@ -291,7 +557,7 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
       role="dialog"
       aria-modal="true"
     >
-      {/* Prev button */}
+      {/* Prev */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -312,7 +578,6 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
           alt={item.title}
           className="w-full h-auto max-h-[90vh] object-contain rounded-xl shadow-2xl"
         />
-
         {/* Close */}
         <button
           onClick={onClose}
@@ -322,15 +587,14 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
         >
           ✕
         </button>
-
         {/* Caption */}
-        <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-sm px-3 py-1 rounded-t-lg shadow">
+        <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-xs px-3 py-1 rounded-t-lg shadow">
           {item.title} {item.year ? `· ${item.year}` : ""}{" "}
           {item.size ? `· ${item.size}` : ""}
         </div>
       </div>
 
-      {/* Next button */}
+      {/* Next */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -345,113 +609,76 @@ function Lightbox({ item, onClose, onPrev, onNext }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Contact form (Formspree)
-// ─────────────────────────────────────────────────────────────
-function ContactForm({ items }) {
-  const [state, setState] = useState({
-    name: "",
-    email: "",
-    piece: "",
-    message: "",
-  });
+/* Reusable minimal form (Formspree) */
+function SimpleForm({ endpoint, subject, children }) {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
 
   async function onSubmit(e) {
     e.preventDefault();
     setStatus("sending");
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { Accept: "application/json" },
         body: new FormData(e.currentTarget),
       });
       if (res.ok) {
         setStatus("sent");
-        setState({ name: "", email: "", piece: "", message: "" });
-      } else {
-        setStatus("error");
-      }
+        e.currentTarget.reset();
+      } else setStatus("error");
     } catch {
       setStatus("error");
     }
   }
 
   return (
-    <section id="contact" className="max-w-3xl mx-auto px-4 py-12">
-      <h2 className="text-2xl font-semibold mb-4">Contact</h2>
-      <p className="text-neutral-700 mb-6">
-        Interested in a piece or have a question? Send me a message below.
-      </p>
-
+    <>
       {status === "sent" ? (
-        <div className="rounded-xl bg-green-50 text-green-800 border border-green-200 p-4">
-          Thank you! Your message was sent. I’ll get back to you soon.
+        <div className="rounded-xl bg-green-50 text-green-800 border border-green-200 p-4 text-sm">
+          Thank you! Your message was sent.
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <input type="hidden" name="_subject" value="New inquiry from xotten.com" />
-          <div className="grid sm:grid-cols-2 gap-4">
-            <input
-              name="name"
-              required
-              placeholder="Your name"
-              className="px-3 py-2 rounded-xl border border-neutral-300"
-              value={state.name}
-              onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
-            />
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Your email"
-              className="px-3 py-2 rounded-xl border border-neutral-300"
-              value={state.email}
-              onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
-            />
-          </div>
-          <select
-            name="piece"
-            className="px-3 py-2 rounded-xl border border-neutral-300"
-            value={state.piece}
-            onChange={(e) => setState((s) => ({ ...s, piece: e.target.value }))}
-          >
-            <option value="">General enquiry</option>
-            {items.map((it) => (
-              <option key={it.id} value={it.title}>
-                {it.title}
-              </option>
-            ))}
-          </select>
-          <textarea
-            name="message"
-            required
-            placeholder="Your message"
-            className="px-3 py-2 rounded-xl border border-neutral-300 min-h-[120px]"
-            value={state.message}
-            onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
-          />
+        <form onSubmit={onSubmit} className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4">
+          <input type="hidden" name="_subject" value={subject} />
+          {children}
           <button
             type="submit"
             disabled={status === "sending"}
-            className="px-4 py-2 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-60"
+            className="px-4 py-2 rounded-xl bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition text-sm disabled:opacity-60"
           >
-            {status === "sending" ? "Sending…" : "Send message"}
+            {status === "sending" ? "Sending…" : "Send"}
           </button>
-          <p className="text-sm text-neutral-500">
-            Prefer email?{" "}
-            <a className="underline" href="mailto:xottenhobby@gmail.com">
-              xottenhobby@gmail.com
-            </a>
-          </p>
+          {status === "error" && (
+            <div className="text-xs text-red-600">Oops—please try again.</div>
+          )}
         </form>
       )}
+    </>
+  );
+}
 
-      {status === "error" && (
-        <div className="mt-4 rounded-xl bg-red-50 text-red-800 border border-red-200 p-3">
-          Oops—something went wrong. Please try again or email me directly.
-        </div>
-      )}
-    </section>
+function TextInput({ label, name, type = "text", required = false }) {
+  return (
+    <label className="block text-sm">
+      <span className="block mb-1 text-neutral-700">{label}</span>
+      <input
+        className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+        name={name}
+        type={type}
+        required={required}
+      />
+    </label>
+  );
+}
+function TextArea({ label, name, required = false }) {
+  return (
+    <label className="block text-sm">
+      <span className="block mb-1 text-neutral-700">{label}</span>
+      <textarea
+        className="w-full min-h-[140px] px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+        name={name}
+        required={required}
+      />
+    </label>
   );
 }
