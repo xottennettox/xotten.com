@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
    Config
    ───────────────────────────────────────────────────────────── */
 const OWNER_CODE = "universe and me are all aligned";
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb"; // your Formspree endpoint
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb";
 const DENSITY_KEY = "density_v3";
 
 /* Fallback data so local preview works even if art.json isn’t there yet */
@@ -46,7 +46,8 @@ function useHashRoute(defaultRoute = "homepage") {
     window.location.hash.replace(/^#/, "") || defaultRoute
   );
   useEffect(() => {
-    const onHash = () => setRoute(window.location.hash.replace(/^#/, "") || defaultRoute);
+    const onHash = () =>
+      setRoute(window.location.hash.replace(/^#/, "") || defaultRoute);
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [defaultRoute]);
@@ -71,7 +72,7 @@ export default function App() {
   /* lightbox index */
   const [activeIndex, setActiveIndex] = useState(null);
 
-  /* simple routes */
+  /* routes */
   const [route] = useHashRoute("homepage");
 
   /* owner mode via ?owner=… or saved flag */
@@ -161,7 +162,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900">
+    <div
+      className="min-h-screen text-neutral-900"
+      style={{ backgroundColor: "#d9bf92" }} // page background
+    >
       <Header
         route={route}
         q={q}
@@ -177,7 +181,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {route === "homepage" && (
           <>
-            <SectionTitle title="Homepage" />
+            <SectionTitle title={`Homepage (${available.length})`} />
             <div className={gridClasses}>
               {available.map((it, idx) => (
                 <Card
@@ -190,7 +194,7 @@ export default function App() {
               ))}
             </div>
             {available.length === 0 && (
-              <div className="text-sm text-neutral-500 mt-4">
+              <div className="text-sm text-neutral-800 mt-4">
                 Nothing to show.
               </div>
             )}
@@ -199,7 +203,7 @@ export default function App() {
 
         {route === "portfolio" && (
           <>
-            <SectionTitle title="Portfolio" />
+            <SectionTitle title={`Portfolio (${sold.length})`} />
             <div className={gridClasses}>
               {sold.map((it, idx) => (
                 <Card
@@ -212,7 +216,7 @@ export default function App() {
               ))}
             </div>
             {sold.length === 0 && (
-              <div className="text-sm text-neutral-500 mt-4">
+              <div className="text-sm text-neutral-800 mt-4">
                 No portfolio items yet.
               </div>
             )}
@@ -222,7 +226,7 @@ export default function App() {
         {route === "detail" && (
           <>
             <SectionTitle title="Detail photos" />
-            <p className="text-sm text-neutral-600 mb-4">
+            <p className="text-sm text-neutral-900 mb-4">
               Click any artwork to open a large, high-quality view. Use your
               keyboard arrows to navigate; press Esc to close.
             </p>
@@ -243,7 +247,7 @@ export default function App() {
         {route === "bio" && (
           <section className="max-w-4xl mx-auto py-6">
             <SectionTitle title="Bio" />
-            <p className="text-sm leading-relaxed text-neutral-700">
+            <p className="text-sm leading-relaxed text-neutral-900">
               I’m Xotten — painter and explorer of color, geometry, and rhythm.
               My work blends intuitive gestures with structured forms to create
               calm, luminous spaces. Every piece is an invitation to pause,
@@ -255,7 +259,7 @@ export default function App() {
         {route === "guestbook" && (
           <section className="max-w-3xl mx-auto py-6">
             <SectionTitle title="Guestbook" />
-            <p className="text-sm text-neutral-600 mb-4">
+            <p className="text-sm text-neutral-900 mb-4">
               Leave a note — I love reading your impressions.
             </p>
             <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New guestbook entry">
@@ -269,7 +273,7 @@ export default function App() {
         {route === "blog" && (
           <section className="max-w-4xl mx-auto py-6">
             <SectionTitle title="Blog" />
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-900">
               Blog coming soon. I’ll share works-in-progress, thoughts and
               events here.
             </p>
@@ -279,7 +283,7 @@ export default function App() {
         {route === "contact" && (
           <section className="max-w-3xl mx-auto py-6">
             <SectionTitle title="Contact" />
-            <p className="text-sm text-neutral-600 mb-4">
+            <p className="text-sm text-neutral-900 mb-4">
               Interested in a piece or have a question? Send me a message.
             </p>
             <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New inquiry from xotten.com">
@@ -290,7 +294,7 @@ export default function App() {
               <TextInput name="piece" label="Artwork (optional)" />
               <TextArea name="message" label="Message" required />
             </SimpleForm>
-            <p className="text-xs text-neutral-500 mt-3">
+            <p className="text-xs text-neutral-900 mt-3">
               Prefer email?{" "}
               <a className="underline" href="mailto:xottenhobby@gmail.com">
                 xottenhobby@gmail.com
@@ -300,7 +304,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="py-8 text-center text-xs text-neutral-500">
+      <footer className="py-8 text-center text-xs text-neutral-900">
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
@@ -317,6 +321,8 @@ export default function App() {
           }
         />
       )}
+
+      <BackToTop />
     </div>
   );
 }
@@ -337,34 +343,43 @@ function Header({
   onOwner,
 }) {
   const [open, setOpen] = useState(false);
-  const activeClass = "text-neutral-900 font-medium";
-  const linkClass = "block px-4 py-2 rounded hover:bg-neutral-100";
+  const activeClass = "text-neutral-900 font-semibold";
+  const linkClass = "block px-4 py-2 rounded hover:bg-black/10";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white">
+    <header
+      className="sticky top-0 z-30 border-b border-neutral-400"
+      style={{ backgroundColor: "#d9bf92" }} // header matches page bg
+    >
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         {/* Hamburger */}
         <button
           aria-label="Menu"
           onClick={() => setOpen(true)}
-          className="w-9 h-9 rounded-lg border border-neutral-300 flex items-center justify-center hover:bg-neutral-100"
+          className="w-9 h-9 rounded-lg border border-neutral-500/50 flex items-center justify-center hover:bg-black/10"
+          title="Open menu"
         >
           ☰
         </button>
 
-        {/* Logo */}
-        <div className="text-xl font-bold tracking-tight">Xotten Art</div>
+        {/* Logo with tiny shadow */}
+        <div
+          className="text-xl font-bold tracking-tight"
+          style={{ textShadow: "0 1px 1px rgba(0,0,0,0.18)" }}
+        >
+          Xotten Art
+        </div>
 
         {/* Right controls */}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <input
-            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
             placeholder="Search…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <select
-            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             title="Tag filter"
@@ -376,7 +391,7 @@ function Header({
             ))}
           </select>
           <select
-            className="px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
             value={density}
             onChange={(e) => setDensity(e.target.value)}
             title="Thumbnail size"
@@ -404,20 +419,22 @@ function Header({
         aria-hidden={!open}
       />
 
-      {/* SOLID drawer */}
+      {/* SOLID drawer with darker color */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 z-[80] bg-white text-neutral-900 shadow-2xl border-r border-neutral-200 transform transition-transform ${
+        className={`fixed top-0 left-0 h-full w-72 z-[80] text-neutral-900 shadow-2xl border-r border-neutral-700/30 transform transition-transform ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ backgroundColor: "#caa668" }}
         role="dialog"
         aria-modal="true"
       >
-        <div className="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-neutral-800/20 flex items-center justify-between">
           <div className="font-semibold">Menu</div>
           <button
             aria-label="Close menu"
-            className="w-8 h-8 rounded-md border border-neutral-300 hover:bg-neutral-100"
+            className="w-8 h-8 rounded-md border border-neutral-700/40 hover:bg-black/10"
             onClick={() => setOpen(false)}
+            title="Close menu"
           >
             ✕
           </button>
@@ -479,14 +496,26 @@ function Header({
 }
 
 function SectionTitle({ title }) {
-  return <h2 className="text-base font-semibold mb-3">{title}</h2>;
+  return (
+    <h2
+      className="text-base font-semibold mb-3"
+      style={{ textShadow: "0 1px 1px rgba(0,0,0,0.18)" }}
+    >
+      {title}
+    </h2>
+  );
 }
 
 /* Consistent rounded thumbnails + smaller text, owner-only price */
 function Card({ item, owner, density, onOpen }) {
-  const pad = density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
+  const pad =
+    density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
   const titleSize =
-    density === "compact" ? "text-[0.95rem]" : density === "cozy" ? "text-[1.02rem]" : "text-base";
+    density === "compact"
+      ? "text-[0.95rem]"
+      : density === "cozy"
+      ? "text-[1.02rem]"
+      : "text-base";
   const infoSize = density === "compact" ? "text-xs" : "text-sm";
 
   return (
@@ -500,6 +529,7 @@ function Card({ item, owner, density, onOpen }) {
           alt={item.title}
           className="w-full h-full object-cover group-hover:scale-[1.02] transition"
           loading="lazy"
+          decoding="async"
         />
       </div>
       <div className={pad}>
@@ -508,15 +538,17 @@ function Card({ item, owner, density, onOpen }) {
             {item.title}
           </h3>
           {item.year && (
-            <span className="text-[0.8rem] text-neutral-500">{item.year}</span>
+            <span className="text-[0.8rem] text-neutral-700">{item.year}</span>
           )}
         </div>
-        <div className={`mt-1 text-neutral-600 ${infoSize}`}>
+        <div className={`mt-1 text-neutral-800 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
         {/* Price: only owner sees it */}
         {owner && item.price && (
-          <div className="mt-2 text-xs font-medium">{item.price}</div>
+          <div className="mt-2 text-xs font-medium text-neutral-900">
+            {item.price}
+          </div>
         )}
       </div>
     </button>
@@ -585,6 +617,27 @@ function Lightbox({ list, index, onClose, onPrev, onNext }) {
   );
 }
 
+/* Floating Back-to-top button */
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 600);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-5 right-5 z-50 rounded-full shadow-lg border border-neutral-700/40 px-3 py-2 text-sm bg-white hover:bg-neutral-100"
+      title="Back to top"
+    >
+      ↑ Top
+    </button>
+  );
+}
+
 /* Reusable minimal form (Formspree) */
 function SimpleForm({ endpoint, subject, children }) {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
@@ -639,7 +692,7 @@ function SimpleForm({ endpoint, subject, children }) {
 function TextInput({ label, name, type = "text", required = false }) {
   return (
     <label className="block text-sm">
-      <span className="block mb-1 text-neutral-700">{label}</span>
+      <span className="block mb-1 text-neutral-900">{label}</span>
       <input
         className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
         name={name}
@@ -652,7 +705,7 @@ function TextInput({ label, name, type = "text", required = false }) {
 function TextArea({ label, name, required = false }) {
   return (
     <label className="block text-sm">
-      <span className="block mb-1 text-neutral-700">{label}</span>
+      <span className="block mb-1 text-neutral-900">{label}</span>
       <textarea
         className="w-full min-h-[140px] px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
         name={name}
