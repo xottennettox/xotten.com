@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 //  Config
 // ─────────────────────────────────────────────────────────────
 const OWNER_CODE = "universe and me are all aligned"; // change whenever you like
-const DENSITY_KEY = "density_v3"; // bump to reset everyone to Compact
+const DENSITY_KEY = "density_v3"; // compact default
 
 // Data fallback so local preview works even before art.json exists
 const FALLBACK_DATA = [
@@ -39,6 +39,13 @@ function cldThumb(url, width = 1600) {
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
+// Encode helper for Netlify form POST
+function encode(data) {
+  return Object.keys(data)
+    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
+    .join("&");
+}
+
 export default function App() {
   const [items, setItems] = useState(FALLBACK_DATA);
   const [q, setQ] = useState("");
@@ -46,7 +53,7 @@ export default function App() {
   const [owner, setOwner] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null); // lightbox
 
-  // Thumbnail density (default to 'compact'; stored per browser)
+  // Thumbnail density (default: 'compact')
   const [density, setDensity] = useState(
     localStorage.getItem(DENSITY_KEY) || "compact"
   );
@@ -132,6 +139,44 @@ export default function App() {
       ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
       : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"; // comfortable
 
+  // ─────────────────────────────────────────────────────────────
+  // Contact form state & submit (Netlify Forms)
+  // ─────────────────────────────────────────────────────────────
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    piece: "",
+    message: "",
+    "bot-field": "", // honeypot
+  });
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    if (form["bot-field"]) return; // ignore bots
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encode({
+          "form-name": "contact",
+          ...form,
+        }),
+      });
+      setSent(true);
+      setForm({ name: "", email: "", piece: "", message: "", "bot-field": "" });
+    } catch (err) {
+      setError("Oops, something went wrong. Please try again in a moment.");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
       {/* Header */}
@@ -202,6 +247,102 @@ export default function App() {
           calm, luminous spaces. Every piece is an invitation to pause, breathe,
           and feel.
         </p>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="max-w-3xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-semibold mb-4">Contact</h2>
+
+        {sent ? (
+          <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
+            Thank you — I’ll get back to you soon.
+          </div>
+        ) : (
+          <form
+            name="contact"
+            method="POST"
+            data-netlify="true"
+            netlify-honeypot="bot-field"
+            onSubmit={handleSubmit}
+            className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4"
+          >
+            {/* Netlify needs these */}
+            <input type="hidden" name="form-name" value="contact" />
+            <input
+              type="text"
+              name="bot-field"
+              value={form["bot-field"]}
+              onChange={handleChange}
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">Name</label>
+                <input
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Email</label>
+                <input
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">Artwork (optional)</label>
+              <select
+                className="w-full px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+                name="piece"
+                value={form.piece}
+                onChange={handleChange}
+              >
+                <option value="">General enquiry</option>
+                {items.map((it) => (
+                  <option key={it.id} value={it.title}>
+                    {it.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">Message</label>
+              <textarea
+                className="w-full min-h-[140px] px-3 py-2 rounded-xl border border-neutral-300 focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+                name="message"
+                value={form.message}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-xl bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition"
+            >
+              Send
+            </button>
+
+            {error && (
+              <div className="text-sm text-red-600 mt-2">{error}</div>
+            )}
+          </form>
+        )}
       </section>
 
       {/* Footer */}
