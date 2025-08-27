@@ -1,13 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 /* ─────────────────────────────────────────────────────────────
+   Theme colors (your request)
+   ───────────────────────────────────────────────────────────── */
+const PAGE_BG = "#d9bf92";      // whole page
+const DRAWER_BG = "#caa668";    // slide-out menu
+const PANEL_BG = "#ead9b5";     // cards, forms, inputs (replaces white)
+const BORDER_COL = "#a7844e";   // gentle border on tan
+const TEXT_SHADOW = "0 1px 0 rgba(0,0,0,.9), 0 2px 2px rgba(0,0,0,.25)"; // like your example
+
+/* ─────────────────────────────────────────────────────────────
    Config
    ───────────────────────────────────────────────────────────── */
 const OWNER_CODE = "universe and me are all aligned";
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb";
 const DENSITY_KEY = "density_v3";
 
-/* Fallback data so local preview works even if art.json isn’t there yet */
+/* Fallback data for local preview */
 const FALLBACK_DATA = [
   {
     id: "art-001",
@@ -33,14 +42,14 @@ const FALLBACK_DATA = [
   },
 ];
 
-/* Cloudinary: add smart transforms if URL is Cloudinary */
+/* Cloudinary helper */
 function cldThumb(url, width = 1600) {
   if (!url || typeof url !== "string") return url;
   if (!url.includes("/upload/")) return url;
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
-/* Tiny hash router (no package) */
+/* Tiny hash router */
 function useHashRoute(defaultRoute = "homepage") {
   const [route, setRoute] = useState(
     window.location.hash.replace(/^#/, "") || defaultRoute
@@ -162,10 +171,7 @@ export default function App() {
   }
 
   return (
-    <div
-      className="min-h-screen text-neutral-900"
-      style={{ backgroundColor: "#d9bf92" }} // page background
-    >
+    <div className="min-h-screen text-neutral-900" style={{ backgroundColor: PAGE_BG }}>
       <Header
         route={route}
         q={q}
@@ -181,7 +187,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {route === "homepage" && (
           <>
-            <SectionTitle title={`Homepage (${available.length})`} />
+            <SectionTitle title="Homepage" />
             <div className={gridClasses}>
               {available.map((it, idx) => (
                 <Card
@@ -193,17 +199,12 @@ export default function App() {
                 />
               ))}
             </div>
-            {available.length === 0 && (
-              <div className="text-sm text-neutral-800 mt-4">
-                Nothing to show.
-              </div>
-            )}
           </>
         )}
 
         {route === "portfolio" && (
           <>
-            <SectionTitle title={`Portfolio (${sold.length})`} />
+            <SectionTitle title="Portfolio" />
             <div className={gridClasses}>
               {sold.map((it, idx) => (
                 <Card
@@ -215,11 +216,6 @@ export default function App() {
                 />
               ))}
             </div>
-            {sold.length === 0 && (
-              <div className="text-sm text-neutral-800 mt-4">
-                No portfolio items yet.
-              </div>
-            )}
           </>
         )}
 
@@ -344,28 +340,29 @@ function Header({
 }) {
   const [open, setOpen] = useState(false);
   const activeClass = "text-neutral-900 font-semibold";
-  const linkClass = "block px-4 py-2 rounded hover:bg-black/10";
+  const linkBase = "block px-4 py-2 rounded";
 
   return (
     <header
-      className="sticky top-0 z-30 border-b border-neutral-400"
-      style={{ backgroundColor: "#d9bf92" }} // header matches page bg
+      className="sticky top-0 z-30 border-b"
+      style={{ backgroundColor: PAGE_BG, borderColor: BORDER_COL }}
     >
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         {/* Hamburger */}
         <button
           aria-label="Menu"
           onClick={() => setOpen(true)}
-          className="w-9 h-9 rounded-lg border border-neutral-500/50 flex items-center justify-center hover:bg-black/10"
+          className="w-9 h-9 rounded-lg border flex items-center justify-center"
+          style={{ borderColor: BORDER_COL, backgroundColor: PANEL_BG }}
           title="Open menu"
         >
           ☰
         </button>
 
-        {/* Logo with tiny shadow */}
+        {/* Logo with stronger shadow */}
         <div
           className="text-xl font-bold tracking-tight"
-          style={{ textShadow: "0 1px 1px rgba(0,0,0,0.18)" }}
+          style={{ textShadow: TEXT_SHADOW }}
         >
           Xotten Art
         </div>
@@ -373,13 +370,15 @@ function Header({
         {/* Right controls */}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <input
-            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
+            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
             placeholder="Search…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <select
-            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
+            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             title="Tag filter"
@@ -391,7 +390,8 @@ function Header({
             ))}
           </select>
           <select
-            className="px-3 py-2 rounded-xl border border-neutral-600/50 bg-white text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
+            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
             value={density}
             onChange={(e) => setDensity(e.target.value)}
             title="Thumbnail size"
@@ -401,7 +401,8 @@ function Header({
             <option value="comfortable">Comfortable</option>
           </select>
           <button
-            className="px-3 py-2 rounded-xl border border-transparent bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition text-sm"
+            className="px-3 py-2 rounded-xl border text-sm text-white hover:opacity-95 transition"
+            style={{ backgroundColor: "#CC5C3F", borderColor: "transparent" }}
             onClick={onOwner}
             title="Owner login"
           >
@@ -410,7 +411,7 @@ function Header({
         </div>
       </div>
 
-      {/* Dark overlay (behind the drawer) */}
+      {/* Dark overlay */}
       <div
         className={`fixed inset-0 z-[60] bg-black/70 transition-opacity ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -419,73 +420,88 @@ function Header({
         aria-hidden={!open}
       />
 
-      {/* SOLID drawer with darker color */}
+      {/* Solid drawer in darker tan */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 z-[80] text-neutral-900 shadow-2xl border-r border-neutral-700/30 transform transition-transform ${
+        className={`fixed top-0 left-0 h-full w-72 z-[80] text-neutral-900 shadow-2xl border-r transform transition-transform ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
-        style={{ backgroundColor: "#caa668" }}
+        style={{ backgroundColor: DRAWER_BG, borderColor: BORDER_COL }}
         role="dialog"
         aria-modal="true"
       >
-        <div className="px-4 py-3 border-b border-neutral-800/20 flex items-center justify-between">
-          <div className="font-semibold">Menu</div>
+        <div
+          className="px-4 py-3 border-b flex items-center justify-between"
+          style={{ borderColor: BORDER_COL }}
+        >
+          <div className="font-semibold" style={{ textShadow: TEXT_SHADOW }}>
+            Menu
+          </div>
           <button
             aria-label="Close menu"
-            className="w-8 h-8 rounded-md border border-neutral-700/40 hover:bg-black/10"
+            className="w-8 h-8 rounded-md border"
+            style={{ borderColor: BORDER_COL, backgroundColor: PANEL_BG }}
             onClick={() => setOpen(false)}
             title="Close menu"
           >
             ✕
           </button>
         </div>
-        <nav className="p-3 text-sm">
+        <nav className="p-3 text-sm space-y-1">
           <a
             href="#homepage"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "homepage" ? activeClass : ""}`}
+            className={`${linkBase} ${
+              route === "homepage" ? activeClass : ""
+            }`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Homepage
           </a>
           <a
             href="#portfolio"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "portfolio" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "portfolio" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Portfolio
           </a>
           <a
             href="#detail"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "detail" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "detail" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Detail photos
           </a>
           <a
             href="#bio"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "bio" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "bio" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Bio
           </a>
           <a
             href="#guestbook"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "guestbook" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "guestbook" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Guestbook
           </a>
           <a
             href="#blog"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "blog" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "blog" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Blog
           </a>
           <a
             href="#contact"
             onClick={() => setOpen(false)}
-            className={`${linkClass} ${route === "contact" ? activeClass : ""}`}
+            className={`${linkBase} ${route === "contact" ? activeClass : ""}`}
+            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
           >
             Contact
           </a>
@@ -499,14 +515,15 @@ function SectionTitle({ title }) {
   return (
     <h2
       className="text-base font-semibold mb-3"
-      style={{ textShadow: "0 1px 1px rgba(0,0,0,0.18)" }}
+      style={{ textShadow: TEXT_SHADOW }}
     >
       {title}
     </h2>
   );
 }
 
-/* Consistent rounded thumbnails + smaller text, owner-only price */
+/* Consistent rounded thumbnails + smaller text, owner-only price
+   Panels and cards use PANEL_BG instead of white */
 function Card({ item, owner, density, onOpen }) {
   const pad =
     density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
@@ -521,9 +538,10 @@ function Card({ item, owner, density, onOpen }) {
   return (
     <button
       onClick={onOpen}
-      className="group relative text-left bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition cursor-zoom-in"
+      className="group relative text-left rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition cursor-zoom-in border"
+      style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
     >
-      <div className="aspect-square bg-neutral-100 overflow-hidden rounded-xl">
+      <div className="aspect-square overflow-hidden rounded-xl" style={{ backgroundColor: "#f3f3f3" }}>
         <img
           src={cldThumb(item.image, 1200)}
           alt={item.title}
@@ -538,10 +556,10 @@ function Card({ item, owner, density, onOpen }) {
             {item.title}
           </h3>
           {item.year && (
-            <span className="text-[0.8rem] text-neutral-700">{item.year}</span>
+            <span className="text-[0.8rem] text-neutral-800">{item.year}</span>
           )}
         </div>
-        <div className={`mt-1 text-neutral-800 ${infoSize}`}>
+        <div className={`mt-1 text-neutral-900 ${infoSize}`}>
           {item.media} {item.size ? <>· {item.size}</> : null}
         </div>
         {/* Price: only owner sees it */}
@@ -617,7 +635,7 @@ function Lightbox({ list, index, onClose, onPrev, onNext }) {
   );
 }
 
-/* Floating Back-to-top button */
+/* Floating Back-to-top button (uses panel color) */
 function BackToTop() {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -630,7 +648,8 @@ function BackToTop() {
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-5 right-5 z-50 rounded-full shadow-lg border border-neutral-700/40 px-3 py-2 text-sm bg-white hover:bg-neutral-100"
+      className="fixed bottom-5 right-5 z-50 rounded-full shadow-lg px-3 py-2 text-sm"
+      style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
       title="Back to top"
     >
       ↑ Top
@@ -638,7 +657,7 @@ function BackToTop() {
   );
 }
 
-/* Reusable minimal form (Formspree) */
+/* Reusable minimal form (Formspree) — panel background */
 function SimpleForm({ endpoint, subject, children }) {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
 
@@ -663,25 +682,36 @@ function SimpleForm({ endpoint, subject, children }) {
   return (
     <>
       {status === "sent" ? (
-        <div className="rounded-xl bg-green-50 text-green-800 border border-green-200 p-4 text-sm">
+        <div
+          className="rounded-xl p-4 text-sm"
+          style={{
+            backgroundColor: "#e4f5e8",
+            border: "1px solid #b7e0c4",
+            color: "#0f5132",
+          }}
+        >
           Thank you! Your message was sent.
         </div>
       ) : (
         <form
           onSubmit={onSubmit}
-          className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-4"
+          className="rounded-2xl shadow-sm p-5 space-y-4 border"
+          style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
         >
           <input type="hidden" name="_subject" value={subject} />
           {children}
           <button
             type="submit"
             disabled={status === "sending"}
-            className="px-4 py-2 rounded-xl bg-[#CC5C3F] text-white hover:bg-[#b44f36] transition text-sm disabled:opacity-60"
+            className="px-4 py-2 rounded-xl text-sm text-white disabled:opacity-60"
+            style={{ backgroundColor: "#CC5C3F" }}
           >
             {status === "sending" ? "Sending…" : "Send"}
           </button>
           {status === "error" && (
-            <div className="text-xs text-red-600">Oops—please try again.</div>
+            <div className="text-xs" style={{ color: "#b42318" }}>
+              Oops—please try again.
+            </div>
           )}
         </form>
       )}
@@ -694,7 +724,8 @@ function TextInput({ label, name, type = "text", required = false }) {
     <label className="block text-sm">
       <span className="block mb-1 text-neutral-900">{label}</span>
       <input
-        className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+        className="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
+        style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
         name={name}
         type={type}
         required={required}
@@ -707,7 +738,8 @@ function TextArea({ label, name, required = false }) {
     <label className="block text-sm">
       <span className="block mb-1 text-neutral-900">{label}</span>
       <textarea
-        className="w-full min-h-[140px] px-3 py-2 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30 focus:border-[#CC5C3F]"
+        className="w-full min-h-[140px] px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
+        style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
         name={name}
         required={required}
       />
