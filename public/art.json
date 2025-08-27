@@ -1,20 +1,20 @@
 [
   {
     "id": "art-001",
-    "title": "Celestial Discovery",
+    "title": "Ethereal Resonance",
     "year": 2024,
-    "media": "Acrylic on canvas",
+    "media": "Mixed media",
     "size": "73x53 cm",
     "sold": false,
     "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210029/Ethereal_Resonance_73_x_53_cm_eu3ad5.jpg",
-    "tags": ["abstract", "blue"]
+    "tags": ["sunlight", "orange"]
   },
   {
     "id": "art-002",
-    "title": "Quiet Orchard",
+    "title": "Starshine",
     "year": 2024,
-    "media": "Watercolor",
-    "size": "30x42 cm",
+    "media": "Mixed media",
+    "size": "60x40 cm",
     "sold": false,
     "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210004/Starshine_60_x_40_cm_kelto4.jpg",
     "tags": ["nature", "green"]
@@ -74,7 +74,7 @@
 },
 {
   "id": "art-008",
-  "title": "Z Elements of Life",
+  "title": ".Elements of Life",
   "year": 2025,
   "media": "Mixed media",
   "size": "20x20 cm",
@@ -188,7 +188,7 @@
 },
 {
   "id": "art-019",
-  "title": "Z Cosmic Symphony",
+  "title": ".Cosmic Symphony",
   "year": 2025,
   "media": "Mixed media",
   "size": "122x61 cm",
@@ -198,7 +198,7 @@
 },
 {
   "id": "art-020",
-  "title": "Z Ether Plume",
+  "title": ".Ether Plume",
   "year": 2025,
   "media": "Mixed media",
   "size": "43x55 cm",
@@ -209,7 +209,7 @@
 ,
 {
   "id": "art-021",
-  "title": "Z Flourish in Vale",
+  "title": ".Flourish in Vale",
   "year": 2025,
   "media": "Mixed media",
   "size": "60x40 cm",
@@ -219,7 +219,7 @@
 },
 {
   "id": "art-022",
-  "title": "Z KaleidoSoul",
+  "title": ".KaleidoSoul",
   "year": 2025,
   "media": "Mixed media",
   "size": "42x30 cm",
@@ -229,7 +229,7 @@
 },
 {
   "id": "art-023",
-  "title": "Z Lady in Blue",
+  "title": ".Lady in Blue",
   "year": 2025,
   "media": "Mixed media",
   "size": "60x40 cm",
@@ -240,7 +240,7 @@
 ,
 {
   "id": "art-024",
-  "title": "Z Lunar Arcaja",
+  "title": ".Lunar Arcaja",
   "year": 2025,
   "media": "Mixed media",
   "size": "60x61 cm",
@@ -250,7 +250,7 @@
 },
 {
   "id": "art-025",
-  "title": "Z Recurrent Dreams",
+  "title": ".Recurrent Dreams",
   "year": 2025,
   "media": "Mixed media",
   "size": "122x61 cm",
@@ -260,7 +260,7 @@
 },
 {
   "id": "art-026",
-  "title": "Z Sapphire Field",
+  "title": ".Sapphire Field",
   "year": 2025,
   "media": "Mixed media",
   "size": "73x53 cm",
@@ -271,7 +271,7 @@
 ,
 {
   "id": "art-027",
-  "title": "Z Solaria",
+  "title": ".Solaria",
   "year": 2025,
   "media": "Mixed media",
   "size": "64x55 cm",
@@ -281,7 +281,7 @@
 },
 {
   "id": "art-028",
-  "title": "Z Spring Sanctum",
+  "title": ".Spring Sanctum",
   "year": 2025,
   "media": "Mixed media",
   "size": "33x24 cm",
@@ -291,7 +291,7 @@
 },
 {
   "id": "art-029",
-  "title": "Z Stellar Dance",
+  "title": ".Stellar Dance",
   "year": 2025,
   "media": "Mixed media",
   "size": "60x40 cm",
@@ -302,7 +302,7 @@
 ,
 {
   "id": "art-030",
-  "title": "Z The Spark",
+  "title": ".The Spark",
   "year": 2025,
   "media": "Mixed media",
   "size": "61x20 cm",
@@ -312,7 +312,7 @@
 },
 {
   "id": "art-031",
-  "title": "Z Tranquil Wonder",
+  "title": ".Tranquil Wonder",
   "year": 2025,
   "media": "Mixed media",
   "size": "73x53 cm",

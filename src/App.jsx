@@ -159,6 +159,17 @@ useEffect(() => {
           ))}
         </div>
       </main>
+	  {/* About */}
+<section id="about" className="max-w-4xl mx-auto px-4 py-12">
+  <h2 className="text-2xl font-semibold mb-3">About</h2>
+  <p className="text-neutral-700 leading-relaxed">
+    I’m Xotten — painter and explorer of color, geometry, and rhythm.
+    My work blends intuitive gestures with structured forms to create
+    calm, luminous spaces. Every piece is an invitation to pause, breathe,
+    and feel.
+  </p>
+</section>
+
 
       {/* Footer */}
       <footer className="py-10 text-center text-sm text-neutral-500">
