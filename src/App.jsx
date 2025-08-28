@@ -1,22 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 /* ─────────────────────────────────────────────────────────────
-   Theme colors (your request)
-   ───────────────────────────────────────────────────────────── */
-const PAGE_BG = "#d9bf92";      // whole page
-const DRAWER_BG = "#caa668";    // slide-out menu
-const PANEL_BG = "#ead9b5";     // cards, forms, inputs (replaces white)
-const BORDER_COL = "#a7844e";   // gentle border on tan
-const TEXT_SHADOW = "0 1px 0 rgba(0,0,0,.9), 0 2px 2px rgba(0,0,0,.25)"; // like your example
-
-/* ─────────────────────────────────────────────────────────────
    Config
    ───────────────────────────────────────────────────────────── */
-const OWNER_CODE = "universe and me are all aligned";
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb";
-const DENSITY_KEY = "density_v3";
+const OWNER_CODE = "universe and me are all aligned"; // owner view unlock
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpwjwwwb"; // contact form
 
-/* Fallback data for local preview */
+// Fallback (so local preview works even without art.json)
 const FALLBACK_DATA = [
   {
     id: "art-001",
@@ -24,7 +14,6 @@ const FALLBACK_DATA = [
     year: 2025,
     media: "Oil on canvas",
     size: "80×60 cm",
-    price: "€1,200",
     sold: false,
     image: "/art/sample1.jpg",
     tags: ["abstract", "blue"],
@@ -35,66 +24,46 @@ const FALLBACK_DATA = [
     year: 2024,
     media: "Watercolor",
     size: "30×42 cm",
-    price: "€350",
     sold: true,
     image: "/art/sample2.jpg",
     tags: ["nature", "green"],
   },
 ];
 
-/* Cloudinary helper */
+/** Add Cloudinary transforms if URL is Cloudinary */
 function cldThumb(url, width = 1600) {
   if (!url || typeof url !== "string") return url;
   if (!url.includes("/upload/")) return url;
   return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width}/`);
 }
 
-/* Tiny hash router */
-function useHashRoute(defaultRoute = "homepage") {
-  const [route, setRoute] = useState(
-    window.location.hash.replace(/^#/, "") || defaultRoute
-  );
-  useEffect(() => {
-    const onHash = () =>
-      setRoute(window.location.hash.replace(/^#/, "") || defaultRoute);
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, [defaultRoute]);
-  return [route, (r) => (window.location.hash = r)];
-}
-
 export default function App() {
-  /* data + filters */
   const [items, setItems] = useState(FALLBACK_DATA);
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("all");
-
-  /* owner mode + prices visibility */
   const [owner, setOwner] = useState(false);
-
-  /* density (thumbnail size) */
-  const [density, setDensity] = useState(
-    localStorage.getItem(DENSITY_KEY) || "compact"
-  );
-  useEffect(() => localStorage.setItem(DENSITY_KEY, density), [density]);
-
-  /* lightbox index */
   const [activeIndex, setActiveIndex] = useState(null);
+  const [section, setSection] = useState(() => {
+    const h = window.location.hash.toLowerCase();
+    if (h.includes("portfolio")) return "portfolio";
+    if (h.includes("about")) return "about";
+    if (h.includes("contact")) return "contact";
+    return "home";
+  });
 
-  /* routes */
-  const [route] = useHashRoute("homepage");
-
-  /* owner mode via ?owner=… or saved flag */
+  // Owner unlock via ?owner=...
   useEffect(() => {
     const saved = localStorage.getItem("ownerMode") === "1";
     const code = new URLSearchParams(window.location.search).get("owner");
     if (code && code.toLowerCase().trim() === OWNER_CODE.toLowerCase().trim()) {
       localStorage.setItem("ownerMode", "1");
       setOwner(true);
-    } else if (saved) setOwner(true);
+    } else if (saved) {
+      setOwner(true);
+    }
   }, []);
 
-  /* load art.json */
+  // Load artworks
   useEffect(() => {
     fetch("/art.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : FALLBACK_DATA))
@@ -102,61 +71,53 @@ export default function App() {
       .catch(() => setItems(FALLBACK_DATA));
   }, []);
 
-  /* tags */
+  // Build tags for filter
   const allTags = useMemo(() => {
     const set = new Set();
     items.forEach((it) => it.tags?.forEach((t) => set.add(t)));
     return ["all", ...Array.from(set).sort()];
   }, [items]);
 
-  /* filtering */
-  const filterList = (list) => {
+  // Filtered list based on section + search + tag
+  const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    return list.filter((it) => {
-      const passQ =
-        !ql ||
-        it.title?.toLowerCase().includes(ql) ||
-        it.media?.toLowerCase().includes(ql) ||
-        it.size?.toLowerCase().includes(ql) ||
-        String(it.year || "").includes(ql) ||
-        it.tags?.some((t) => t.toLowerCase().includes(ql));
-      const passTag = tag === "all" || it.tags?.includes(tag);
-      return passQ && passTag;
-    });
-  };
+    return items
+      .filter((it) =>
+        section === "portfolio" ? it.sold === true : it.sold !== true
+      )
+      .filter((it) => {
+        const passQ =
+          !ql ||
+          it.title?.toLowerCase().includes(ql) ||
+          it.media?.toLowerCase().includes(ql) ||
+          it.size?.toLowerCase().includes(ql) ||
+          String(it.year || "").includes(ql) ||
+          it.tags?.some((t) => t.toLowerCase().includes(ql));
+        const passTag = tag === "all" || it.tags?.includes(tag);
+        return passQ && passTag;
+      });
+  }, [items, q, tag, section]);
 
-  const available = filterList(items.filter((it) => !it.sold));
-  const sold = filterList(items.filter((it) => it.sold));
-  const currentList =
-    route === "portfolio"
-      ? sold
-      : route === "detail"
-      ? available.concat(sold)
-      : available; // homepage
-
-  /* keyboard for lightbox */
+  // Keyboard for lightbox
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") setActiveIndex(null);
       if (activeIndex !== null) {
         if (e.key === "ArrowLeft") {
-          setActiveIndex((i) => (i > 0 ? i - 1 : currentList.length - 1));
+          setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1));
         } else if (e.key === "ArrowRight") {
-          setActiveIndex((i) => (i < currentList.length - 1 ? i + 1 : 0));
+          setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0));
         }
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, currentList]);
+  }, [activeIndex, filtered.length]);
 
-  /* grid classes */
-  const gridClasses =
-    density === "compact"
-      ? "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3"
-      : density === "cozy"
-      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+  // Update hash when section changes
+  useEffect(() => {
+    window.location.hash = section === "home" ? "" : `#${section}`;
+  }, [section]);
 
   function enterOwnerCode() {
     const code = window.prompt("Enter owner code:");
@@ -171,410 +132,342 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen text-neutral-900" style={{ backgroundColor: PAGE_BG }}>
-      <Header
-        route={route}
-        q={q}
-        setQ={setQ}
-        tag={tag}
-        setTag={setTag}
-        allTags={allTags}
-        density={density}
-        setDensity={setDensity}
-        onOwner={enterOwnerCode}
-      />
+    <div
+      className="min-h-screen text-neutral-900"
+      style={{
+        // Page background: warm tan; optional bg image if /bg.jpg exists
+        backgroundColor: "#d9bf92",
+        backgroundImage: "url('/bg.jpg')",
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* TOP BAR */}
+      <header className="sticky top-0 z-30 backdrop-blur bg-[#d9bf92e6] border-b border-[#caa668]/40">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div
+            className="text-xl sm:text-2xl font-bold tracking-tight select-none"
+            style={{
+              color: "#2b2b2b",
+              filter:
+                "drop-shadow(0 1px 0 rgba(0,0,0,0.30)) drop-shadow(0 2px 0 rgba(0,0,0,0.20))",
+            }}
+          >
+            Xotten Art
+          </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {route === "homepage" && (
+          <nav className="mx-auto hidden sm:flex items-center gap-6 text-[15px]">
+            <NavLink
+              current={section === "home"}
+              onClick={() => setSection("home")}
+            >
+              Home
+            </NavLink>
+            <NavLink
+              current={section === "portfolio"}
+              onClick={() => setSection("portfolio")}
+            >
+              Portfolio
+            </NavLink>
+            <NavLink
+              current={section === "about"}
+              onClick={() => setSection("about")}
+            >
+              About
+            </NavLink>
+            <NavLink
+              current={section === "contact"}
+              onClick={() => setSection("contact")}
+            >
+              Contact
+            </NavLink>
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2">
+            {(section === "home" || section === "portfolio") && (
+              <>
+                <input
+                  className="px-3 py-2 rounded-xl border bg-[#e7d8b9] border-[#caa668]/60 focus:outline-none focus:ring focus:ring-black/10"
+                  placeholder="Search…"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+                <select
+                  className="px-3 py-2 rounded-xl border bg-[#e7d8b9] border-[#caa668]/60"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                  title="Filter by tag"
+                >
+                  {allTags.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            <button
+              className="px-3 py-2 rounded-xl bg-[#caa668] text-white/95 hover:brightness-95"
+              title="Owner login"
+              onClick={enterOwnerCode}
+            >
+              Owner
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN */}
+      <main className="max-w-7xl mx-auto px-4 py-10">
+        {section === "about" && <About />}
+        {section === "contact" && <ContactForm />}
+        {(section === "home" || section === "portfolio") && (
           <>
-            <SectionTitle title="Homepage" />
-            <div className={gridClasses}>
-              {available.map((it, idx) => (
-                <Card
+            <h2
+              className="text-center text-xl sm:text-2xl font-semibold mb-6 select-none"
+              style={{
+                filter:
+                  "drop-shadow(0 1px 0 rgba(0,0,0,0.35)) drop-shadow(0 2px 0 rgba(0,0,0,0.18))",
+                color: "#4b3a21",
+              }}
+            >
+              {section === "home" ? "Available Works" : "Portfolio"}
+            </h2>
+
+            {/* NOTE: pure image tiles (no card boxes), equal height row feel */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {filtered.map((it, idx) => (
+                <Tile
                   key={it.id}
                   item={it}
                   owner={owner}
-                  density={density}
                   onOpen={() => setActiveIndex(idx)}
                 />
               ))}
             </div>
           </>
-        )}
-
-        {route === "portfolio" && (
-          <>
-            <SectionTitle title="Portfolio" />
-            <div className={gridClasses}>
-              {sold.map((it, idx) => (
-                <Card
-                  key={it.id}
-                  item={it}
-                  owner={owner}
-                  density={density}
-                  onOpen={() => setActiveIndex(idx)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {route === "detail" && (
-          <>
-            <SectionTitle title="Detail photos" />
-            <p className="text-sm text-neutral-900 mb-4">
-              Click any artwork to open a large, high-quality view. Use your
-              keyboard arrows to navigate; press Esc to close.
-            </p>
-            <div className={gridClasses}>
-              {currentList.map((it, idx) => (
-                <Card
-                  key={it.id}
-                  item={it}
-                  owner={owner}
-                  density={density}
-                  onOpen={() => setActiveIndex(idx)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {route === "bio" && (
-          <section className="max-w-4xl mx-auto py-6">
-            <SectionTitle title="Bio" />
-            <p className="text-sm leading-relaxed text-neutral-900">
-              I’m Xotten — painter and explorer of color, geometry, and rhythm.
-              My work blends intuitive gestures with structured forms to create
-              calm, luminous spaces. Every piece is an invitation to pause,
-              breathe, and feel.
-            </p>
-          </section>
-        )}
-
-        {route === "guestbook" && (
-          <section className="max-w-3xl mx-auto py-6">
-            <SectionTitle title="Guestbook" />
-            <p className="text-sm text-neutral-900 mb-4">
-              Leave a note — I love reading your impressions.
-            </p>
-            <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New guestbook entry">
-              <TextInput name="name" label="Name" required />
-              <TextInput name="email" type="email" label="Email" required />
-              <TextArea name="message" label="Message" required />
-            </SimpleForm>
-          </section>
-        )}
-
-        {route === "blog" && (
-          <section className="max-w-4xl mx-auto py-6">
-            <SectionTitle title="Blog" />
-            <p className="text-sm text-neutral-900">
-              Blog coming soon. I’ll share works-in-progress, thoughts and
-              events here.
-            </p>
-          </section>
-        )}
-
-        {route === "contact" && (
-          <section className="max-w-3xl mx-auto py-6">
-            <SectionTitle title="Contact" />
-            <p className="text-sm text-neutral-900 mb-4">
-              Interested in a piece or have a question? Send me a message.
-            </p>
-            <SimpleForm endpoint={FORMSPREE_ENDPOINT} subject="New inquiry from xotten.com">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <TextInput name="name" label="Name" required />
-                <TextInput name="email" type="email" label="Email" required />
-              </div>
-              <TextInput name="piece" label="Artwork (optional)" />
-              <TextArea name="message" label="Message" required />
-            </SimpleForm>
-            <p className="text-xs text-neutral-900 mt-3">
-              Prefer email?{" "}
-              <a className="underline" href="mailto:xottenhobby@gmail.com">
-                xottenhobby@gmail.com
-              </a>
-            </p>
-          </section>
         )}
       </main>
 
-      <footer className="py-8 text-center text-xs text-neutral-900">
+      {/* FOOTER */}
+      <footer className="py-10 text-center text-[13px] text-neutral-800/80">
         © {new Date().getFullYear()} · All works © You.
       </footer>
 
+      {/* LIGHTBOX */}
       {activeIndex !== null && (
         <Lightbox
-          list={currentList}
-          index={activeIndex}
+          item={filtered[activeIndex]}
           onClose={() => setActiveIndex(null)}
           onPrev={() =>
-            setActiveIndex((i) => (i > 0 ? i - 1 : currentList.length - 1))
+            setActiveIndex((i) => (i > 0 ? i - 1 : filtered.length - 1))
           }
           onNext={() =>
-            setActiveIndex((i) => (i < currentList.length - 1 ? i + 1 : 0))
+            setActiveIndex((i) => (i < filtered.length - 1 ? i + 1 : 0))
           }
         />
       )}
-
-      <BackToTop />
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Pieces
+   UI bits
    ───────────────────────────────────────────────────────────── */
 
-function Header({
-  route,
-  q,
-  setQ,
-  tag,
-  setTag,
-  allTags,
-  density,
-  setDensity,
-  onOwner,
-}) {
-  const [open, setOpen] = useState(false);
-  const activeClass = "text-neutral-900 font-semibold";
-  const linkBase = "block px-4 py-2 rounded";
-
-  return (
-    <header
-      className="sticky top-0 z-30 border-b"
-      style={{ backgroundColor: PAGE_BG, borderColor: BORDER_COL }}
-    >
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-        {/* Hamburger */}
-        <button
-          aria-label="Menu"
-          onClick={() => setOpen(true)}
-          className="w-9 h-9 rounded-lg border flex items-center justify-center"
-          style={{ borderColor: BORDER_COL, backgroundColor: PANEL_BG }}
-          title="Open menu"
-        >
-          ☰
-        </button>
-
-        {/* Logo with stronger shadow */}
-        <div
-          className="text-xl font-bold tracking-tight"
-          style={{ textShadow: TEXT_SHADOW }}
-        >
-          Xotten Art
-        </div>
-
-        {/* Right controls */}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <input
-            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
-            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-            placeholder="Search…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <select
-            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
-            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-            title="Tag filter"
-          >
-            {allTags.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <select
-            className="px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
-            style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-            value={density}
-            onChange={(e) => setDensity(e.target.value)}
-            title="Thumbnail size"
-          >
-            <option value="compact">Compact</option>
-            <option value="cozy">Cozy</option>
-            <option value="comfortable">Comfortable</option>
-          </select>
-          <button
-            className="px-3 py-2 rounded-xl border text-sm text-white hover:opacity-95 transition"
-            style={{ backgroundColor: "#CC5C3F", borderColor: "transparent" }}
-            onClick={onOwner}
-            title="Owner login"
-          >
-            Owner
-          </button>
-        </div>
-      </div>
-
-      {/* Dark overlay */}
-      <div
-        className={`fixed inset-0 z-[60] bg-black/70 transition-opacity ${
-          open ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setOpen(false)}
-        aria-hidden={!open}
-      />
-
-      {/* Solid drawer in darker tan */}
-      <aside
-        className={`fixed top-0 left-0 h-full w-72 z-[80] text-neutral-900 shadow-2xl border-r transform transition-transform ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
-        style={{ backgroundColor: DRAWER_BG, borderColor: BORDER_COL }}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div
-          className="px-4 py-3 border-b flex items-center justify-between"
-          style={{ borderColor: BORDER_COL }}
-        >
-          <div className="font-semibold" style={{ textShadow: TEXT_SHADOW }}>
-            Menu
-          </div>
-          <button
-            aria-label="Close menu"
-            className="w-8 h-8 rounded-md border"
-            style={{ borderColor: BORDER_COL, backgroundColor: PANEL_BG }}
-            onClick={() => setOpen(false)}
-            title="Close menu"
-          >
-            ✕
-          </button>
-        </div>
-        <nav className="p-3 text-sm space-y-1">
-          <a
-            href="#homepage"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${
-              route === "homepage" ? activeClass : ""
-            }`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Homepage
-          </a>
-          <a
-            href="#portfolio"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "portfolio" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Portfolio
-          </a>
-          <a
-            href="#detail"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "detail" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Detail photos
-          </a>
-          <a
-            href="#bio"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "bio" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Bio
-          </a>
-          <a
-            href="#guestbook"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "guestbook" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Guestbook
-          </a>
-          <a
-            href="#blog"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "blog" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Blog
-          </a>
-          <a
-            href="#contact"
-            onClick={() => setOpen(false)}
-            className={`${linkBase} ${route === "contact" ? activeClass : ""}`}
-            style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-          >
-            Contact
-          </a>
-        </nav>
-      </aside>
-    </header>
-  );
-}
-
-function SectionTitle({ title }) {
-  return (
-    <h2
-      className="text-base font-semibold mb-3"
-      style={{ textShadow: TEXT_SHADOW }}
-    >
-      {title}
-    </h2>
-  );
-}
-
-/* Consistent rounded thumbnails + smaller text, owner-only price
-   Panels and cards use PANEL_BG instead of white */
-function Card({ item, owner, density, onOpen }) {
-  const pad =
-    density === "compact" ? "p-3" : density === "cozy" ? "p-3.5" : "p-4";
-  const titleSize =
-    density === "compact"
-      ? "text-[0.95rem]"
-      : density === "cozy"
-      ? "text-[1.02rem]"
-      : "text-base";
-  const infoSize = density === "compact" ? "text-xs" : "text-sm";
-
+function NavLink({ current, onClick, children }) {
   return (
     <button
-      onClick={onOpen}
-      className="group relative text-left rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition cursor-zoom-in border"
-      style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
+      onClick={onClick}
+      className={`relative px-2 pb-1 transition ${
+        current ? "text-[#4b3a21]" : "text-neutral-800/80 hover:text-[#4b3a21]"
+      }`}
+      style={{
+        filter:
+          "drop-shadow(0 1px 0 rgba(0,0,0,0.25)) drop-shadow(0 2px 0 rgba(0,0,0,0.15))",
+      }}
     >
-      <div className="aspect-square overflow-hidden rounded-xl" style={{ backgroundColor: "#f3f3f3" }}>
-        <img
-          src={cldThumb(item.image, 1200)}
-          alt={item.title}
-          className="w-full h-full object-cover group-hover:scale-[1.02] transition"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div className={pad}>
-        <div className="flex items-baseline gap-2">
-          <h3 className={`font-semibold leading-tight flex-1 ${titleSize}`}>
-            {item.title}
-          </h3>
-          {item.year && (
-            <span className="text-[0.8rem] text-neutral-800">{item.year}</span>
-          )}
-        </div>
-        <div className={`mt-1 text-neutral-900 ${infoSize}`}>
-          {item.media} {item.size ? <>· {item.size}</> : null}
-        </div>
-        {/* Price: only owner sees it */}
-        {owner && item.price && (
-          <div className="mt-2 text-xs font-medium text-neutral-900">
-            {item.price}
-          </div>
-        )}
-      </div>
+      {children}
+      {current && (
+        <span className="absolute -bottom-1 left-0 right-0 mx-auto h-[2px] w-7 bg-[#caa668] rounded-full" />
+      )}
     </button>
   );
 }
 
-function Lightbox({ list, index, onClose, onPrev, onNext }) {
-  const item = list[index];
+/** Pure image tile (no panel). Same visual height for a clean row look. */
+function Tile({ item, owner, onOpen }) {
+  return (
+    <button
+      onClick={onOpen}
+      className="group relative block cursor-zoom-in"
+      title={item.title}
+    >
+      <div className="w-full h-[300px] sm:h-[320px] md:h-[340px] lg:h-[360px]">
+        <img
+          src={cldThumb(item.image, 1600)}
+          alt={item.title}
+          className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+          loading="lazy"
+        />
+      </div>
+
+      {/* Hover caption */}
+      <div className="pointer-events-none absolute left-0 right-0 bottom-0 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition">
+        <div className="mx-auto w-fit rounded-full px-3 py-1 text-[12px] text-[#3a2d18] bg-[#e9dbbd]/90 border border-[#caa668]/40">
+          {item.title} {item.year ? `· ${item.year}` : ""}{" "}
+          {item.size ? `· ${item.size}` : ""}
+        </div>
+      </div>
+
+      {/* Owner-only sold ribbon (public won’t see this label) */}
+      {owner && item.sold && (
+        <div className="absolute left-0 top-3 -rotate-6 bg-[#caa668] text-white px-3 py-1 text-xs uppercase tracking-wider rounded-r-xl shadow">
+          Sold
+        </div>
+      )}
+    </button>
+  );
+}
+
+function About() {
+  return (
+    <section className="max-w-4xl mx-auto">
+      <div className="rounded-2xl border border-[#caa668]/40 bg-[#e7d8b9]/70 p-6">
+        <h2
+          className="text-xl sm:text-2xl font-semibold mb-3"
+          style={{
+            color: "#4b3a21",
+            filter:
+              "drop-shadow(0 1px 0 rgba(0,0,0,0.35)) drop-shadow(0 2px 0 rgba(0,0,0,0.18))",
+          }}
+        >
+          About
+        </h2>
+        <p className="leading-relaxed text-[15px] text-neutral-900/90">
+          I’m Xotten — painter and explorer of color, geometry, and rhythm. My
+          work blends intuitive gestures with structured forms to create calm,
+          luminous spaces. Every piece is an invitation to pause, breathe, and
+          feel.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ContactForm() {
+  const [state, setState] = useState({
+    name: "",
+    email: "",
+    piece: "",
+    message: "",
+  });
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    setStatus("sending");
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new FormData(e.currentTarget),
+      });
+      if (res.ok) {
+        setStatus("sent");
+        setState({ name: "", email: "", piece: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <section className="max-w-3xl mx-auto">
+      <div className="rounded-2xl border border-[#caa668]/40 bg-[#e7d8b9]/70 p-6">
+        <h2
+          className="text-xl sm:text-2xl font-semibold mb-4"
+          style={{
+            color: "#4b3a21",
+            filter:
+              "drop-shadow(0 1px 0 rgba(0,0,0,0.35)) drop-shadow(0 2px 0 rgba(0,0,0,0.18))",
+          }}
+        >
+          Contact
+        </h2>
+
+        {status === "sent" ? (
+          <div className="rounded-xl bg-green-50 border border-green-200 text-green-800 p-4">
+            Thank you! Your message was sent. I’ll get back to you soon.
+          </div>
+        ) : (
+          <form onSubmit={onSubmit} className="grid gap-4 text-[15px]">
+            <input type="hidden" name="_subject" value="New inquiry from xotten.com" />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <input
+                name="name"
+                required
+                placeholder="Your name"
+                className="px-3 py-2 rounded-xl border border-[#caa668]/50 bg-[#f2e7ca]"
+                value={state.name}
+                onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
+              />
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="Your email"
+                className="px-3 py-2 rounded-xl border border-[#caa668]/50 bg-[#f2e7ca]"
+                value={state.email}
+                onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
+              />
+            </div>
+            <input
+              name="piece"
+              placeholder="Artwork (optional)"
+              className="px-3 py-2 rounded-xl border border-[#caa668]/50 bg-[#f2e7ca]"
+              value={state.piece}
+              onChange={(e) => setState((s) => ({ ...s, piece: e.target.value }))}
+            />
+            <textarea
+              name="message"
+              required
+              placeholder="Your message"
+              className="px-3 py-2 rounded-xl border border-[#caa668]/50 bg-[#f2e7ca] min-h-[130px]"
+              value={state.message}
+              onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
+            />
+            <button
+              type="submit"
+              disabled={status === "sending"}
+              className="px-4 py-2 rounded-xl bg-[#caa668] text-white hover:brightness-95 disabled:opacity-60"
+            >
+              {status === "sending" ? "Sending…" : "Send message"}
+            </button>
+            <p className="text-sm text-neutral-700">
+              Prefer email?{" "}
+              <a className="underline" href="mailto:xottenhobby@gmail.com">
+                xottenhobby@gmail.com
+              </a>
+            </p>
+          </form>
+        )}
+
+        {status === "error" && (
+          <div className="mt-4 rounded-xl bg-red-50 text-red-800 border border-red-200 p-3">
+            Oops—something went wrong. Please try again or email me directly.
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function Lightbox({ item, onClose, onPrev, onNext }) {
   const src = cldThumb(item.image, 2400);
   return (
     <div
@@ -604,7 +497,6 @@ function Lightbox({ list, index, onClose, onPrev, onNext }) {
           alt={item.title}
           className="w-full h-auto max-h-[90vh] object-contain rounded-xl shadow-2xl"
         />
-        {/* Close */}
         <button
           onClick={onClose}
           aria-label="Close"
@@ -613,8 +505,7 @@ function Lightbox({ list, index, onClose, onPrev, onNext }) {
         >
           ✕
         </button>
-        {/* Caption */}
-        <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-xs px-3 py-1 rounded-t-lg shadow">
+        <div className="absolute left-0 right-0 -bottom-1 mx-auto w-fit bg-white/90 text-neutral-900 text-sm px-3 py-1 rounded-t-lg shadow">
           {item.title} {item.year ? `· ${item.year}` : ""}{" "}
           {item.size ? `· ${item.size}` : ""}
         </div>
@@ -632,117 +523,5 @@ function Lightbox({ list, index, onClose, onPrev, onNext }) {
         ›
       </button>
     </div>
-  );
-}
-
-/* Floating Back-to-top button (uses panel color) */
-function BackToTop() {
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 600);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  if (!show) return null;
-  return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-5 right-5 z-50 rounded-full shadow-lg px-3 py-2 text-sm"
-      style={{ backgroundColor: PANEL_BG, border: `1px solid ${BORDER_COL}` }}
-      title="Back to top"
-    >
-      ↑ Top
-    </button>
-  );
-}
-
-/* Reusable minimal form (Formspree) — panel background */
-function SimpleForm({ endpoint, subject, children }) {
-  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    setStatus("sending");
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: new FormData(e.currentTarget),
-      });
-      if (res.ok) {
-        setStatus("sent");
-        e.currentTarget.reset();
-      } else setStatus("error");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  return (
-    <>
-      {status === "sent" ? (
-        <div
-          className="rounded-xl p-4 text-sm"
-          style={{
-            backgroundColor: "#e4f5e8",
-            border: "1px solid #b7e0c4",
-            color: "#0f5132",
-          }}
-        >
-          Thank you! Your message was sent.
-        </div>
-      ) : (
-        <form
-          onSubmit={onSubmit}
-          className="rounded-2xl shadow-sm p-5 space-y-4 border"
-          style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-        >
-          <input type="hidden" name="_subject" value={subject} />
-          {children}
-          <button
-            type="submit"
-            disabled={status === "sending"}
-            className="px-4 py-2 rounded-xl text-sm text-white disabled:opacity-60"
-            style={{ backgroundColor: "#CC5C3F" }}
-          >
-            {status === "sending" ? "Sending…" : "Send"}
-          </button>
-          {status === "error" && (
-            <div className="text-xs" style={{ color: "#b42318" }}>
-              Oops—please try again.
-            </div>
-          )}
-        </form>
-      )}
-    </>
-  );
-}
-
-function TextInput({ label, name, type = "text", required = false }) {
-  return (
-    <label className="block text-sm">
-      <span className="block mb-1 text-neutral-900">{label}</span>
-      <input
-        className="w-full px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
-        style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-        name={name}
-        type={type}
-        required={required}
-      />
-    </label>
-  );
-}
-function TextArea({ label, name, required = false }) {
-  return (
-    <label className="block text-sm">
-      <span className="block mb-1 text-neutral-900">{label}</span>
-      <textarea
-        className="w-full min-h-[140px] px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring focus:ring-[#CC5C3F]/30"
-        style={{ backgroundColor: PANEL_BG, borderColor: BORDER_COL }}
-        name={name}
-        required={required}
-      />
-    </label>
   );
 }
