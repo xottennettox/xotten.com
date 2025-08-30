@@ -1,0 +1,324 @@
+[
+  {
+    "id": "art-001",
+    "title": "Ethereal Resonance",
+    "year": 2024,
+    "media": "Mixed media",
+    "size": "73x53 cm",
+    "sold": false,
+    "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210029/Ethereal_Resonance_73_x_53_cm_eu3ad5.jpg",
+    "tags": ["sunlight", "orange"]
+  },
+  {
+    "id": "art-002",
+    "title": "Starshine",
+    "year": 2024,
+    "media": "Mixed media",
+    "size": "60x40 cm",
+    "sold": false,
+    "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756210004/Starshine_60_x_40_cm_kelto4.jpg",
+    "tags": ["nature", "green"]
+  }
+
+,
+{
+  "id": "art-003",
+  "title": "Celestial Discovery",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239830/Clestial_Discovery_73_x_53_cm_vtzwmv.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-004",
+  "title": "Copper Lotus Reverie",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "33x24 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239897/Copper_Lotus_Reverie_33_x_24_cm_v8rj8h.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-005",
+  "title": "Night Devine",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "62x54 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756239950/Night_Devine_62_x_54_cm_er0x2q.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-006",
+  "title": "Red Flame Frequency",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "40x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240261/Red_Flame_Frequency_40_x_30_cm_bnfj17.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-007",
+  "title": "Unifying Tapestry",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "90x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240329/Unifying_Tapestry_90_x_30_cm_juojme.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-008",
+  "title": ".Elements of Life",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "20x20 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240368/Z_Elements_of_Life_20_x_20_cm_zn0v8s.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-009",
+  "title": "Comic Bloom",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756240928/Comic_Bloom_61_x_61_cm_he2hdr.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-010",
+  "title": "Emerald Harmony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "38x38 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241024/Emerald_Harmony_38_x_38_cm_dpswzg.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-011",
+  "title": "Grace of Seraphina",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "55x43 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241150/Grace_of_Seraphina_55_x_43_x-cm_d59ypl.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-012",
+  "title": "Interlaced Symphony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241512/Interlaced_Symphony_61_x_61_cm_kglge3.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-013",
+  "title": "Mystic Embrace",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "38x30 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241544/Mystic_Embrace_38_x_30_cm_wqchyy.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-014",
+  "title": "Starborn",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "46x36 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241634/Starborn_46_x_36_cm_jib6tu.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-015",
+  "title": "Triangularity",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756241995/Triangularity_60_x_40_cm_zmo0rb.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-016",
+  "title": "Trio Sphere",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x61 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242064/Trio_Sphere_61_x_61_cm_tcoghn.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-017",
+  "title": "Triskelion",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242145/Triskelion_60_x_40_cm_n7fmix.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-018",
+  "title": "Whispers of Infinite Bloom",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": false,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242348/Whispers_of_Infinite_Bloom_73_x_53_cm_iy4oj1.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-019",
+  "title": ".Cosmic Symphony",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "122x61 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242481/Z_Cosmic_Symphony_122_x_61_cm_ar2opb.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-020",
+  "title": ".Ether Plume",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "43x55 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242517/Z_Ether_Plume_43_x_55_cm_mte43q.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-021",
+  "title": ".Flourish in Vale",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242811/Z_Flourish_in_Vale_60_x_40_cm_annbt4.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-022",
+  "title": ".KaleidoSoul",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "42x30 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242830/Z_KaleidoSoul_42_x_30_cm_j2zmjc.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-023",
+  "title": ".Lady in Blue",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756242889/Z_Lady_in_Blue_60_x_40_cm_you6ax.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-024",
+  "title": ".Lunar Arcaja",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x61 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243071/Z_Lunar_Arcaja_60_x_61_cm_smsdov.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-025",
+  "title": ".Recurrent Dreams",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "122x61 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243143/Z_Recurrent_Dreams_122_x_61_cm_lxasim.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-026",
+  "title": ".Sapphire Field",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243167/Z_Sapphire_Field_73_x_53_cm_srscyn.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-027",
+  "title": ".Solaria",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "64x55 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243423/Z_Solaria_64_x_55_cm_tfzeva.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-028",
+  "title": ".Spring Sanctum",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "33x24 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243441/Z_Spring_Sanctum_33_x_24_cm_uxalcc.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-029",
+  "title": ".Stellar Dance",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "60x40 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243495/Z_Stellar_Dance_60_x_40_cm_f4wsvh.jpg",
+  "tags": ["new"]
+}
+,
+{
+  "id": "art-030",
+  "title": ".The Spark",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "61x20 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243817/Z_The_Spark_61_x_20_cm_m87ynu.jpg",
+  "tags": ["new"]
+},
+{
+  "id": "art-031",
+  "title": ".Tranquil Wonder",
+  "year": 2025,
+  "media": "Mixed media",
+  "size": "73x53 cm",
+  "sold": true,
+  "image": "https://res.cloudinary.com/db8jfelgo/image/upload/v1756243872/Z_Tranquil_Wonder_73_x_53_xm_kh7tbs.jpg",
+  "tags": ["new"]
+}
+
+]
