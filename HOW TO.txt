@@ -1,0 +1,110 @@
+
+
+
+
+
+
+Save your changes in src/App.jsx.
+Open PowerShell and go to your project folder:
+cd F:\Xotten.com
+npm run dev
+you will get the local host, check on the website
+You’ll see something like:
+
+VITE v5.x  ready
+Local: http://localhost:5173/
+Open that URL in your browser. 
+Changes will auto-reload when you save the file. 
+If it doesn’t, press F5 in the browser.
+
+If good, deploy:
+
+git add src\App.jsx
+git commit -m "Fix paste issue; remove year; size under title; Home + Portfolio sections"
+git push
+
+Handy extras:
+
+Auto-open the browser: npm run dev -- --open
+
+Different port (if 5173 is busy): npm run dev -- --port 5174
+
+Stop the server: press Ctrl+C in the PowerShell window.
+
+Preview the production build (what Netlify serves):
+
+npm run build
+npm run preview
+
+
+Then open the URL it prints (usually http://localhost:4173).
+
+
+
+Alt + O on any page → enter your code (same as before).
+
+Or visit https://xotten.com/?owner=universe and me are all aligned
+
+
+--------------------------------------------------------------------------
+
+Make sure you edited the right file
+
+Open F:\Xotten.com\src\App.jsx in Notepad++.
+
+Quick checks inside the file:
+
+Find Alt + O (secret owner hotkey).
+
+Find the stacked title lines:
+
+Xotten
+Elevated
+Paintings
+
+
+Find the component named SectionTitle.
+
+If those aren’t there, you didn’t paste the new file—paste the whole script again and save.
+
+2) Preview locally
+
+In PowerShell:
+
+cd F:\Xotten.com
+npm run dev
+
+
+Open the URL it prints (usually http://localhost:5173/).
+On Home you should see the stacked “Xotten / Elevated / Paintings”, and the Owner button is not visible (use Alt + O to unlock owner).
+
+If you don’t see the changes locally:
+
+You’re not in the right folder (make sure package.json is in F:\Xotten.com).
+
+Or the file wasn’t saved. Save and restart npm run dev.
+
+3) Deploy to your site
+
+If local looks good, deploy:
+
+cd F:\Xotten.com
+git status
+git add src\App.jsx
+git commit -m "UI update: stacked title, headings outside panel, panel opacity, faster lightbox"
+git push
+
+
+Then hard-reload your site in the browser (Ctrl+F5).
+If it still looks old, open Netlify → Deploys for this site and confirm the latest commit shows as “Published”.
+
+4) Still stuck?
+
+Run these and tell me what they print:
+
+cd F:\Xotten.com
+git remote -v
+git log -1 --stat
+
+
+That confirms you pushed to the correct GitHub repo and that src\App.jsx was included in the last deploy.
